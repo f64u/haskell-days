@@ -16,17 +16,17 @@ data AbstractNatural = Zero | S AbstractNatural
 -- You may not need these so I've left them commented out, but
 -- you should understand why they work.
 --
--- instance Eq AbstractNatural where
---   Zero == Zero = True
---   Zero == S _  = False
---   S _  == Zero = False
---   S x  == S y  = x == y
---
--- instance Ord AbstractNatural where
---   Zero <= Zero = True
---   Zero <= S _  = True
---   S _  <= Zero = False
---   S x  <= S y  = x <= y
+instance Eq AbstractNatural where
+  Zero == Zero = True
+  Zero == S _  = False
+  S _  == Zero = False
+  S x  == S y  = x == y
+
+instance Ord AbstractNatural where
+  Zero <= Zero = True
+  Zero <= S _  = True
+  S _  <= Zero = False
+  S x  <= S y  = x <= y
 --
 -- successorNat :: AbstractNatural -> AbstractNatural
 -- successorNat = S
@@ -38,21 +38,39 @@ data AbstractNatural = Zero | S AbstractNatural
 
 -- Figure out how you will define integers...
 
-data AbstractInteger = Undefined
+data AbstractInteger = P AbstractNatural | N AbstractNatural
     deriving (Show)
 
 -- ...then fill out the functions below for your AbstractInteger type.
 
 successor :: AbstractInteger -> AbstractInteger
-successor = undefined
+successor (P n) = P (S n)
+successor (N Z) = P (S Z)
+successor (N S Z) = P Z
+successor (N S n) = N n
 
 predecessor :: AbstractInteger -> AbstractInteger
-predecessor = undefined
+predecessor (P Z) = N (S Z)
+predecessor (N Z) = N (S Z)
+predecessor (P S Z) = P Z
+predecessor (P S n) = P n
+predecessor (N S n) = N (S (S n))
 
 -- Be sure to add type declarations to all these functions too.
-negator    = undefined
-absolute   = undefined
-add        = undefined
+negator P n = N n
+negator N n = P n
+absolute P n   = P n
+absolute N n = P n
+add (P a) (P b) = P (a + b)
+add (N a) (N b) = N (a + b)
+add (P a) (N b) = 
+    | a == b = P Z
+    | a > b = P (a - b)
+    | a < b = N (b - a)
+add (N a) (P b) = 
+    | a == b = P Z
+    | a > b = N (a - b)
+    | a < b = P (b - a)
 difference = undefined
 multiply   = undefined
 
