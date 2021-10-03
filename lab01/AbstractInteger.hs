@@ -84,9 +84,8 @@ absolute (N n) = P n
 add :: AbstractInteger -> AbstractInteger -> AbstractInteger
 add (P a) (P b) = P (a + b)
 add (N a) (N b) = N (a + b)
-add (P a) (N b) | -- The a == b case can be handled in either.
-                  a > b  = P (a - b)
-                | a <= b = N (b - a)
+add (P a) (N b) | a > b     = P (a - b)
+                | otherwise = N (b - a)
 add (N a) (P b) = add (P b) (N a)
 
 difference :: AbstractInteger -> AbstractInteger -> AbstractInteger
@@ -114,21 +113,25 @@ instance Ord AbstractInteger where
   N a <= N b = a <= b
   P a <= P b = a <= b
 
--- I feel like both of the following could be simplified a bit more.
+-- I feel like both of the following could be implemented more elegantly.
 divide :: AbstractInteger -> AbstractInteger -> AbstractInteger
 divide (N Zero) _ = P Zero
-divide (P a) (P b) | a < b     = P Zero
-                   | otherwise = add (P (S Zero)) (divide (P (a - b)) (P b))
-divide (N n) (N b) = divide (P n) (P b)
+divide (P a) (P b)
+  | b > a     = P Zero
+  | otherwise = add (P (S Zero)) (divide (difference (P a) (P b)) (P b))
 divide (N a) (P b) = add (N (S Zero)) (divide (add (N a) (P b)) (P b))
-divide (P a) (N b) = divide (N a) (P b)
+divide (P a) (N b)
+  | b > a     = P Zero
+  | otherwise = add (N (S Zero)) (divide (add (P a) (N b)) (N b))
+divide (N a) (N b) = add (P (S Zero)) (divide (difference (N a) (N b)) (N b))
 
 modulo :: AbstractInteger -> AbstractInteger -> AbstractInteger
 modulo (P a) (P b) | b > a     = P a
-                   | otherwise = modulo (P (a - b)) (P b)
+                   | otherwise = modulo (difference (P a) (P b)) (P b)
 modulo (N a) (P b) = modulo (add (N a) (P b)) (P b)
-modulo (P a) (N b) = modulo (N a) (P b)
-modulo (N a) (N b) = modulo (P a) (P b)
+modulo (P a) (N b) | b > a     = P a
+                   | otherwise = modulo (add (P a) (N b)) (N b)
+modulo (N a) (N b) = modulo (difference (N a) (N b)) (N b)
 
 toAbstract :: Integer -> AbstractInteger
 toAbstract x | x < 0     = N $ toAbstractNat (-x)
