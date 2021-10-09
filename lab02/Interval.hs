@@ -1,5 +1,7 @@
 module Interval where
 
+import Data.Function ((&))
+
 ---- Intervals ----
 
 data Interval a = Range a a
@@ -9,8 +11,8 @@ isEmptyInterval (Range start end) = start >= end
 
 instance Ord a => Eq (Interval a) where
   i1@(Range start1 end1) == i2@(Range start2 end2) =
-    (isEmptyInterval i1 && isEmptyInterval i2) ||
-    (start1 == start2 && end1 == end2)
+    (isEmptyInterval i1 && isEmptyInterval i2)
+      || (start1 == start2 && end1 == end2)
 
 -- Intervals are ordered by starting time. This is necessary for normalizeIS.
 instance Ord a => Ord (Interval a) where
@@ -31,23 +33,23 @@ instance (Read a, Ord a, Bounded a) => Read (Interval a) where
   -- everything will work.
   -- hint: use the function `read` to get the value of an
   -- endpoint from `next`.
-  readsPrec _ "Empty"        = [(Range minBound minBound, "")]
-  readsPrec _ "All"          = [(undefined, "")]
-  readsPrec _ ('>':'=':next) = [(undefined, "")]
-  readsPrec _ ('<':next)     = [(undefined, "")]
+  readsPrec _ "Empty" = [(Range minBound minBound, "")]
+  readsPrec _ "All" = [(Range minBound maxBound, "")]
+  readsPrec _ ('>' : '=' : next) = [(Range (read next) maxBound, "")]
+  readsPrec _ ('<' : next) = [(Range minBound (read next), "")]
   readsPrec _ str =
     -- Don't worry about this case. It is a
     -- bit clunky. We will learn a better
     -- option later in the course.
     case reads str of
-      (start, '<':'=':'_':'<':rest):_ ->
+      (start, '<' : '=' : '_' : '<' : rest) : _ ->
         case reads rest of
           [] -> error "error parsing interval"
-          (end,_):_ -> [(Range start end, "")]
+          (end, _) : _ -> [(Range start end, "")]
       _ -> error "error parsing interval"
 
 intersectIntervals :: Ord a => Interval a -> Interval a -> Interval a
-intersectIntervals = undefined
+intersectIntervals (Range a1 b1) (Range a2 b2) = Range (max a1 a2) (min b1 b2)
 
 ---- Interval Sets ----
 
@@ -58,7 +60,7 @@ intersectIntervals = undefined
 type IntervalSet a = [Interval a]
 
 toIS :: Interval a -> IntervalSet a
-toIS = (:[])
+toIS = (: [])
 
 emptyIS :: IntervalSet a
 emptyIS = []
@@ -70,12 +72,12 @@ removeEmptyIntervals :: Ord a => IntervalSet a -> IntervalSet a
 removeEmptyIntervals = filter $ not . isEmptyInterval
 
 intersectISI :: Ord a => IntervalSet a -> Interval a -> IntervalSet a
-intersectISI = undefined
+intersectISI xs x = map (intersectIntervals x) xs
 
 -- The complement of an interval must return an interval set because it may
 -- result in two disjoint intervals.
 complementInterval :: (Bounded a, Ord a) => Interval a -> IntervalSet a
-complementInterval = undefined
+complementInterval (Range a b) = [Range minBound a, Range b maxBound]
 
 -- An interval minus an interval must return an interval set because the second
 -- could cut a hold in the middle of the first.
@@ -84,55 +86,52 @@ complementInterval = undefined
 -- IMPORTANT NOTE: There cannot be any empty intervals left over in the ouptut
 -- of this function. Leaving them does not affect the results, but it may make
 -- your program too slow! You are welcome to use removeEmptyIntervals for this.
-differenceIntervals
-  :: (Ord a, Bounded a)
-  => Interval a
-  -> Interval a
-  -> IntervalSet a
-differenceIntervals = undefined
+differenceIntervals ::
+  (Ord a, Bounded a) =>
+  Interval a ->
+  Interval a ->
+  IntervalSet a
+differenceIntervals r1 r2 = removeEmptyIntervals $ intersectISI (complementInterval r2) r1
 
 -- interval set minus an interval
-differenceISI
-  :: (Ord a, Bounded a)
-  => IntervalSet a
-  -> Interval a
-  -> IntervalSet a
-differenceISI = undefined
-
+differenceISI ::
+  (Ord a, Bounded a) =>
+  IntervalSet a ->
+  Interval a ->
+  IntervalSet a
+differenceISI xss x = concatMap (`differenceIntervals` x) xss
 
 ---- Helpers for interval sets ----
 
-intersection
-  :: Ord a
-  => IntervalSet a
-  -> IntervalSet a
-  -> IntervalSet a
-intersection = undefined
+intersection ::
+  Ord a =>
+  IntervalSet a ->
+  IntervalSet a ->
+  IntervalSet a
+intersection = concatMap . intersectISI
 
 union :: IntervalSet a -> IntervalSet a -> IntervalSet a
-union = undefined
+union = (++)
 
-difference
-  :: (Ord a, Bounded a)
-  => IntervalSet a
-  -> IntervalSet a
-  -> IntervalSet a
-difference = undefined -- Use foldr.
-
+difference ::
+  (Ord a, Bounded a) =>
+  IntervalSet a ->
+  IntervalSet a ->
+  IntervalSet a
+difference s1 s2 = foldr -- use foldr.
 
 ---- Queries on interval sets ----
 
 intersectAll :: (Ord a, Bounded a) => [IntervalSet a] -> IntervalSet a
-intersectAll = undefined -- Use foldr.
+intersectAll = foldr1 $ flip intersection
 
 unionAll :: [IntervalSet a] -> IntervalSet a
-unionAll = undefined
+unionAll = foldr union emptyIS
 
 -- Subtract from the first interval set all the remaining interval sets.
 differenceAll :: (Ord a, Bounded a) => [IntervalSet a] -> IntervalSet a
 differenceAll [] = emptyIS
-differenceAll (first:rest) = undefined -- Use foldr.
-
+differenceAll (first : rest) = foldr (flip difference) first rest
 
 ---- Boolean Helpers ----
 
@@ -143,8 +142,8 @@ isEmpty = null . removeEmptyIntervals
 -- already defined.
 
 -- two interval sets are disjoint if they do not overlap
-areDisjoint :: (Ord a) => IntervalSet a -> IntervalSet a -> Bool
-areDisjoint = undefined
+areDisjoint :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool -- <--- I added the Bounded constraint in this part.
+areDisjoint a b = areEqual (intersection a b) emptyIS
 
 isSubset :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool
 isSubset = undefined
@@ -152,15 +151,12 @@ isSubset = undefined
 areEqual :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool
 areEqual is1 is2 = is1 `isSubset` is2 && is2 `isSubset` is1
 
-
 ---- Boolean Queries ----
 
 areAllDisjoint :: Ord a => [IntervalSet a] -> Bool
 areAllDisjoint [] = True
-areAllDisjoint (first:rest) = undefined -- Hint : this function is recursive.
+areAllDisjoint (first : rest) = undefined -- Hint : this function is recursive.
 
 areAllEqual :: (Ord a, Bounded a) => [IntervalSet a] -> Bool
 areAllEqual [] = True
-areAllEqual (first:rest) = undefined
-
-
+areAllEqual (first : rest) = undefined
