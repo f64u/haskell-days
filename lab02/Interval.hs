@@ -155,7 +155,7 @@ areEqual is1 is2 = is1 `isSubset` is2 && is2 `isSubset` is1
 
 areAllDisjoint :: Ord a => [IntervalSet a] -> Bool
 areAllDisjoint [] = True
-areAllDisjoint (first : rest) = all (isEmpty . intersection first) rest && areAllDisjoint rest
+areAllDisjoint (first : rest) = all (areDisjoint first) rest && areAllDisjoint rest
 
 areAllEqual :: (Ord a, Bounded a) => [IntervalSet a] -> Bool
 areAllEqual [] = True
