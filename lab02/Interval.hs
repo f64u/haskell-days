@@ -1,7 +1,5 @@
 module Interval where
 
-import Data.Function ((&))
-
 ---- Intervals ----
 
 data Interval a = Range a a
@@ -118,7 +116,7 @@ difference ::
   IntervalSet a ->
   IntervalSet a ->
   IntervalSet a
-difference = foldr (flip differenceISI)
+difference = foldr $ flip differenceISI
 
 ---- Queries on interval sets ----
 
