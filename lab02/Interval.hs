@@ -11,8 +11,8 @@ isEmptyInterval (Range start end) = start >= end
 
 instance Ord a => Eq (Interval a) where
   i1@(Range start1 end1) == i2@(Range start2 end2) =
-    (isEmptyInterval i1 && isEmptyInterval i2)
-      || (start1 == start2 && end1 == end2)
+    isEmptyInterval i1 && isEmptyInterval i2
+      || start1 == start2 && end1 == end2
 
 -- Intervals are ordered by starting time. This is necessary for normalizeIS.
 instance Ord a => Ord (Interval a) where
@@ -118,7 +118,7 @@ difference ::
   IntervalSet a ->
   IntervalSet a ->
   IntervalSet a
-difference s1 s2 = foldr -- use foldr.
+difference = foldr (flip differenceISI)
 
 ---- Queries on interval sets ----
 
@@ -142,11 +142,11 @@ isEmpty = null . removeEmptyIntervals
 -- already defined.
 
 -- two interval sets are disjoint if they do not overlap
-areDisjoint :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool -- <--- I added the Bounded constraint in this part.
-areDisjoint a b = areEqual (intersection a b) emptyIS
+areDisjoint :: (Ord a) => IntervalSet a -> IntervalSet a -> Bool
+areDisjoint a b = isEmpty (intersection a b)
 
 isSubset :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool
-isSubset = undefined
+isSubset a b = isEmpty (difference b a)
 
 areEqual :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a -> Bool
 areEqual is1 is2 = is1 `isSubset` is2 && is2 `isSubset` is1
@@ -155,8 +155,10 @@ areEqual is1 is2 = is1 `isSubset` is2 && is2 `isSubset` is1
 
 areAllDisjoint :: Ord a => [IntervalSet a] -> Bool
 areAllDisjoint [] = True
-areAllDisjoint (first : rest) = undefined -- Hint : this function is recursive.
+areAllDisjoint [_] = True
+areAllDisjoint (first : second : rest) = undefined
 
 areAllEqual :: (Ord a, Bounded a) => [IntervalSet a] -> Bool
 areAllEqual [] = True
-areAllEqual (first : rest) = undefined
+areAllEqual [_] = True
+areAllEqual (first : second : rest) = areEqual first second && areAllEqual (second : rest)

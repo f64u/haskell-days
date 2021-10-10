@@ -1,26 +1,26 @@
 module Main where
 
-import System.IO
 import Data.List
 import Interval
 import SimpleTime
+import System.IO
 
 -- You can change EndpointType to Int for testing, but make sure to change it back
 -- before submission.
 type EndpointType = Time
--- type EndpointType = Int
 
+-- type EndpointType = Int
 
 ---- Input/Output Interface ----
 
 -- Example: splitOn ',' "abc,def,ghi"  => ["abc", "def", "ghi"]
 splitOn :: Char -> String -> [String]
-splitOn splitChar []    = [[]]
-splitOn splitChar (headChar:restChars)
+splitOn splitChar [] = [[]]
+splitOn splitChar (headChar : restChars)
   | splitChar == headChar = [[]] ++ splitOn splitChar restChars
-  | otherwise             = (headChar:currentWord):restWords
+  | otherwise = (headChar : currentWord) : restWords
   where
-    currentWord:restWords = splitOn splitChar restChars
+    currentWord : restWords = splitOn splitChar restChars
 
 -- Vanilla Haskell doesn't allow instances on type synonyms,
 -- so we can't make customized Show/Read instances.
@@ -37,7 +37,7 @@ showIS = concat . intersperse "," . map show . normalizeIS
 normalizeIS :: (Ord a, Bounded a) => IntervalSet a -> IntervalSet a
 normalizeIS s
   | simplified == [] = [Range minBound minBound]
-  | otherwise        = simplified
+  | otherwise = simplified
   where
     inverse = difference allIS
     simplified = sort . removeEmptyIntervals . inverse . inverse $ s
@@ -45,23 +45,22 @@ normalizeIS s
 processLine :: String -> String
 processLine line =
   case words line of
-    "intersection":rest -> undefined -- hint: These can each be done in one line
-    "union":rest        -> undefined -- further hint: think map and ($) and (.)
-    "difference":rest   -> undefined
-    "disjoint":rest     -> undefined
-    "equal":rest        -> undefined
-    _                   -> "Invalid input"
+    "intersection" : rest -> showIS $ intersectAll (map readIS rest)
+    "union" : rest -> showIS $ unionAll (map readIS rest)
+    "difference" : rest -> showIS $ differenceAll (map readIS rest)
+    "disjoint" : rest -> show $ areAllDisjoint (map readIS rest)
+    "equal" : rest -> show $ areAllEqual (map readIS rest)
+    _ -> "Invalid input"
 
 main :: IO ()
 main = do
-  -- <--- Write code here to get a line from the input
-  case undefined of -- Examine the line
-    'q':_ -> return () -- "q" or "quit" to quit
-    _     -> do
-      -- <--- Process and output the line here
+  line <- getLine -- <--- Write code here to get a line from the input
+  case line of -- Examine the line
+    'q' : _ -> return () -- "q" or "quit" to quit
+    _ -> do
+      putStrLn (processLine line) -- <--- Process and output the line here
       hFlush stdout -- "Flush" the output buffer (otherwise Windows may not show output)
       atEnd <- isEOF -- Check if at the end of a file before continuing (for testing)
-      if atEnd then
-        return ()
-      else
-        main -- Repeat
+      if atEnd
+        then return ()
+        else main -- Repeat
