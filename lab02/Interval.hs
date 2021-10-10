@@ -157,5 +157,4 @@ areAllDisjoint (first : rest) = all (areDisjoint first) rest && areAllDisjoint r
 
 areAllEqual :: (Ord a, Bounded a) => [IntervalSet a] -> Bool
 areAllEqual [] = True
-areAllEqual [_] = True
-areAllEqual (first : second : rest) = areEqual first second && areAllEqual (second : rest)
+areAllEqual (first : rest) = all (areEqual first) rest && areAllEqual rest
