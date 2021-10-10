@@ -45,12 +45,14 @@ normalizeIS s
 processLine :: String -> String
 processLine line =
   case words line of
-    "intersection" : rest -> showIS $ intersectAll (map readIS rest)
-    "union" : rest -> showIS $ unionAll (map readIS rest)
-    "difference" : rest -> showIS $ differenceAll (map readIS rest)
-    "disjoint" : rest -> show $ areAllDisjoint (map readIS rest)
-    "equal" : rest -> show $ areAllEqual (map readIS rest)
+    "intersection" : rest -> showIS . intersectAll $ is rest
+    "union" : rest -> showIS . unionAll $ is rest
+    "difference" : rest -> showIS . differenceAll $ is rest
+    "disjoint" : rest -> show . areAllDisjoint $ is rest
+    "equal" : rest -> show . areAllEqual $ is rest
     _ -> "Invalid input"
+  where
+    is r = map readIS r
 
 main :: IO ()
 main = do
