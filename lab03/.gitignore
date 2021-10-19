@@ -3,3 +3,4 @@ Main
 *.hi
 *.exe
 .DS_Store
+.vscode/
