@@ -8,20 +8,17 @@ import           Data.Ratio
 data ArithExp = Number Rational | Op Char ArithExp ArithExp deriving (Show, Eq)
 
 data Token = TInt Integer | TNeg | TPlus | TMult | TDiv | TParen [Token] deriving (Show, Eq)
-
-charLookup :: [(Char, (Rational -> Rational -> Rational, Token))]
-charLookup =
+charTable =
   [ ('+', ((+), TPlus))
   , ('*', ((*), TMult))
   , ('/', ((/), TDiv))
   , ('-', (undefined, TNeg))
   ]
-reverseCharLookup :: [(Token, Char)]
-reverseCharLookup = [ (tok, char) | (char, (_, tok)) <- charLookup ]
+revCharTable = [ (tok, char) | (char, (_, tok)) <- charTable ]
 
 eval :: ArithExp -> Rational
 eval (Number n ) = n
-eval (Op op l r) = (fst . fromJust) (lookup op charLookup) (eval l) (eval r)
+eval (Op op l r) = (fst . fromJust) (lookup op charTable) (eval l) (eval r)
 
 tokenize :: String -> [Token]
 tokenize = fst . tokenizeTillClose . filter (not . isSpace)
@@ -36,7 +33,7 @@ tokenizeTillClose (char : rest) = prependTok (tokLookup char)
   $ tokenizeTillClose rest
  where
   tokLookup c | isDigit c = TInt (fromIntegral $ digitToInt c)
-              | otherwise = snd . fromJust $ lookup c charLookup
+              | otherwise = snd . fromJust $ lookup c charTable
 
 prependTok :: a -> ([a], b) -> ([a], b)
 prependTok tok (toks, rest) = (tok : toks, rest)
@@ -51,7 +48,7 @@ parse tokens =
               (r_multdiv, l_multdiv) = (reverse r_multdiv', reverse l_multdiv')
           in  if null l_multdiv
                 then parseOpless tokens
-                else Op (fromJust $ lookup (last l_multdiv) reverseCharLookup)
+                else Op (fromJust $ lookup (last l_multdiv) revCharTable)
                         (parse $ init l_multdiv)
                         (parse r_multdiv)
         else Op '+' (parse l_plus) (parse $ tail r_plus)
