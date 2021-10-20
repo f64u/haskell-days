@@ -40,13 +40,13 @@ tests =
   , expect1
     "eval"
     eval
-    (Mult (Plus (Number 2) (Number (-6))) (Plus (Number 3) (Number 2)))
+    (Op '*' (Op '+' (Number 2) (Number (-6))) (Op '+' (Number 3) (Number 2)))
     (-20)
-  , expect1 "eval" eval (Div (Number 13) (Number 6)) (13 % 6)
+  , expect1 "eval" eval (Op '/' (Number 13) (Number 6)) (13 % 6)
   , expect1
     "eval"
     eval
-    (Plus (Mult (Number 2) (Number 3)) (Div (Number 13) (Number (-6))))
+    (Op '+' (Op '*' (Number 2) (Number 3)) (Op '/' (Number 13) (Number (-6))))
     (23 % 6)
   , expect1 "tokenize" tokenize "1+2"    [TInt 1, TPlus, TInt 2]
   , expect1 "tokenize" tokenize "1 + 20" [TInt 1, TPlus, TInt 2, TInt 0]
@@ -103,25 +103,25 @@ tests =
     , TMult
     , TParen [TInt 3, TPlus, TInt 2]
     ]
-  , expect1 "parse" parse [TInt 2, TPlus, TInt 3] (Plus (Number 2) (Number 3))
-  , expect1 "parse" parse [TInt 2, TMult, TInt 3] (Mult (Number 2) (Number 3))
-  , expect1 "parse" parse [TInt 2, TDiv, TInt 3]  (Div (Number 2) (Number 3))
+  , expect1 "parse" parse [TInt 2, TPlus, TInt 3] (Op '+' (Number 2) (Number 3))
+  , expect1 "parse" parse [TInt 2, TMult, TInt 3] (Op '*' (Number 2) (Number 3))
+  , expect1 "parse" parse [TInt 2, TDiv, TInt 3]  (Op '/' (Number 2) (Number 3))
   , expect1 "parse"
             parse
             [TInt 2, TPlus, TInt 3, TMult, TInt 5]
-            (Plus (Number 2) (Mult (Number 3) (Number 5)))
+            (Op '+' (Number 2) (Op '*' (Number 3) (Number 5)))
   , expect1 "parse"
             parse
             [TParen [TInt 2, TPlus, TInt 3], TMult, TInt 5]
-            (Mult (Plus (Number 2) (Number 3)) (Number 5))
+            (Op '*' (Op '+' (Number 2) (Number 3)) (Number 5))
   , expect1 "parse"
             parse
             [TInt 2, TPlus, TNeg, TInt 3]
-            (Plus (Number 2) (Number (-3)))
+            (Op '+' (Number 2) (Number (-3)))
   , expect1 "parse"
             parse
             [TInt 2, TDiv, TInt 3, TMult, TNeg, TInt 5, TInt 7]
-            (Mult (Div (Number 2) (Number 3)) (Number (-57)))
+            (Op '*' (Op '/' (Number 2) (Number 3)) (Number (-57)))
   , expect1
     "parse"
     parse
@@ -145,20 +145,29 @@ tests =
       , TInt 5
       ]
     ]
-    (Mult
+    (Op
+      '*'
       (Number 10)
-      (Plus
+      (Op
+        '+'
         (Number (-5))
-        (Plus
-          (Mult
-            (Div (Mult (Number 5) (Number (-10)))
-                 (Mult (Number (-5)) (Number 10))
+        (Op
+          '+'
+          (Op
+            '*'
+            (Op '/'
+                (Op '*' (Number 5) (Number (-10)))
+                (Op '*' (Number (-5)) (Number 10))
             )
             (Number 8)
           )
-          (Plus
-            (Plus (Number 11) (Number (-5)))
-            (Plus (Mult (Div (Number 80) (Number 2)) (Number 2)) (Number 5))
+          (Op
+            '+'
+            (Op '+' (Number 11) (Number (-5)))
+            (Op '+'
+                (Op '*' (Op '/' (Number 80) (Number 2)) (Number 2))
+                (Number 5)
+            )
           )
         )
       )
@@ -194,19 +203,27 @@ tests =
     , TNeg
     , TInt 1
     ]
-    (Plus
+    (Op
+      '+'
       (Number 1)
-      (Plus
-        (Plus
+      (Op
+        '+'
+        (Op
+          '+'
           (Number 2)
-          (Plus
-            (Plus
+          (Op
+            '+'
+            (Op
+              '+'
               (Number 3)
-              (Plus
-                (Plus
+              (Op
+                '+'
+                (Op
+                  '+'
                   (Number 4)
-                  (Plus (Plus (Number 5) (Plus (Number 6) (Number (-5))))
-                        (Number (-4))
+                  (Op '+'
+                      (Op '+' (Number 5) (Op '+' (Number 6) (Number (-5))))
+                      (Number (-4))
                   )
                 )
                 (Number (-3))
