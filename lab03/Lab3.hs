@@ -14,12 +14,6 @@ eval (Op op l r) = fromJust (lookup op funcLookup) (eval l) (eval r)
 
 data Token = TInt Integer | TNeg | TPlus | TMult | TDiv | TParen [Token] deriving (Show, Eq)
 
--- Lookup table for our tokinzer
-tokLookup :: Char -> Token
-tokLookup c | isDigit c = TInt (fromIntegral $ digitToInt c)
-            | otherwise = fromJust $ lookup c table
-  where table = [('-', TNeg), ('+', TPlus), ('*', TMult), ('/', TDiv)]
-
 tokenize :: String -> [Token]
 tokenize = fst . tokenizeTillClose . filter (not . isSpace)
 
@@ -29,8 +23,12 @@ tokenizeTillClose (')' : rest) = ([], rest)
 tokenizeTillClose ('(' : rest) =
   let (tokens, otherRest) = tokenizeTillClose rest
   in  prependTok (TParen tokens) (tokenizeTillClose otherRest)
-tokenizeTillClose (char : rest) =
-  prependTok (tokLookup char) $ tokenizeTillClose rest
+tokenizeTillClose (char : rest) = prependTok (tokLookup char)
+  $ tokenizeTillClose rest
+ where
+  tokLookup c | isDigit c = TInt (fromIntegral $ digitToInt c)
+              | otherwise = fromJust $ lookup c table
+  table = [('-', TNeg), ('+', TPlus), ('*', TMult), ('/', TDiv)]
 
 prependTok :: a -> ([a], b) -> ([a], b)
 prependTok tok (toks, rest) = (tok : toks, rest)
