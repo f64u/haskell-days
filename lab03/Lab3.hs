@@ -7,6 +7,8 @@ import           Data.Ratio
 
 data ArithExp = Number Rational | Op Char ArithExp ArithExp deriving (Show, Eq)
 
+data Token = TInt Integer | TNeg | TPlus | TMult | TDiv | TParen [Token] deriving (Show, Eq)
+
 charLookup :: [(Char, (Rational -> Rational -> Rational, Token))]
 charLookup =
   [ ('+', ((+), TPlus))
@@ -18,8 +20,6 @@ charLookup =
 eval :: ArithExp -> Rational
 eval (Number n ) = n
 eval (Op op l r) = (fst . fromJust) (lookup op charLookup) (eval l) (eval r)
-
-data Token = TInt Integer | TNeg | TPlus | TMult | TDiv | TParen [Token] deriving (Show, Eq)
 
 tokenize :: String -> [Token]
 tokenize = fst . tokenizeTillClose . filter (not . isSpace)
