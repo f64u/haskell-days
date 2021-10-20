@@ -3,21 +3,21 @@ module Lab3 where
 import           Data.Char
 import           Data.List
 import           Data.Maybe
-import           Debug.Trace
+import           Data.Ratio
 
-data ArithExp = Number Int | Plus ArithExp ArithExp | Mult ArithExp ArithExp | Div ArithExp ArithExp deriving (Show, Eq)
+data ArithExp = Number Rational | Plus ArithExp ArithExp | Mult ArithExp ArithExp | Div ArithExp ArithExp deriving (Show, Eq)
 
-eval :: ArithExp -> Int
-eval (Number n      ) = n
-eval (Plus exp1 exp2) = eval exp1 + eval exp2
-eval (Mult exp1 exp2) = eval exp1 * eval exp2
-eval (Div  exp1 exp2) = eval exp1 `quot` eval exp2
+eval :: ArithExp -> Rational
+eval (Number n) = n
+eval (Plus l r) = eval l + eval r
+eval (Mult l r) = eval l * eval r
+eval (Div  l r) = eval l / eval r
 
-data Token = TInt Int | TPlus | TNeg | TMult | TDiv | TParen [Token] deriving (Show, Eq)
+data Token = TInt Integer | TPlus | TNeg | TMult | TDiv | TParen [Token] deriving (Show, Eq)
 
 -- Lookup table for our tokinzer
 lookup' :: Char -> Token
-lookup' c | isDigit c = TInt (digitToInt c)
+lookup' c | isDigit c = TInt (fromIntegral $ digitToInt c)
           | c == '+'  = TPlus
           | c == '-'  = TNeg
           | c == '*'  = TMult
@@ -50,7 +50,7 @@ tokenizeTillClose s =
 
 parse :: [Token] -> ArithExp
 parse tokens =
-  let (l_plus, r_plus) = break (== TPlus) tokens
+  let (l_plus, r_plus) = break (== TPlus) tokens -- thank god + is commutative
   in  if null r_plus
         then
           let (r_multdiv', l_multdiv') =
@@ -65,7 +65,7 @@ parse tokens =
  where
   parseOpless (TParen tokens : _) = parse tokens
   parseOpless (TNeg : ns) = let (Number n) = parseOpless ns in Number (-n)
-  parseOpless ns = Number . sum $ zipWith (\i (TInt n) -> 10 ^ i * n)
+  parseOpless ns = Number . sum $ zipWith (\i (TInt n) -> 10 ^ i * (n % 1))
                                           (reverse [0 .. length ns - 1])
                                           ns
 

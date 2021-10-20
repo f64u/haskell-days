@@ -2,6 +2,8 @@ module Tests where
 
 import           Lab3
 
+import           Data.Ratio
+
 data TestResult
   = Success
   | Failure String
@@ -34,18 +36,18 @@ expect1 funcName func input expectedOutput = if expectedOutput == actual
 -- This is where you add new test cases.
 tests :: [TestResult]
 tests =
-  [ expect1 "eval" eval (Number (-3)) (-3)
+  [ expect1 "eval" eval (Number (-3)) (-3 % 1)
   , expect1
     "eval"
     eval
     (Mult (Plus (Number 2) (Number (-6))) (Plus (Number 3) (Number 2)))
     (-20)
-  , expect1 "eval" eval (Div (Number 13) (Number 6)) 2
+  , expect1 "eval" eval (Div (Number 13) (Number 6)) (13 % 6)
   , expect1
     "eval"
     eval
     (Plus (Mult (Number 2) (Number 3)) (Div (Number 13) (Number (-6))))
-    4
+    (23 % 6)
   , expect1 "tokenize" tokenize "1+2"    [TInt 1, TPlus, TInt 2]
   , expect1 "tokenize" tokenize "1 + 20" [TInt 1, TPlus, TInt 2, TInt 0]
   , expect1 "tokenize" tokenize "1 * -2" [TInt 1, TMult, TNeg, TInt 2]
