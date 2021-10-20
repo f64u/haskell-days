@@ -7,10 +7,17 @@ import           Data.Ratio
 
 data ArithExp = Number Rational | Op Char ArithExp ArithExp deriving (Show, Eq)
 
+charLookup :: [(Char, (Rational -> Rational -> Rational, Token))]
+charLookup =
+  [ ('+', ((+), TPlus))
+  , ('*', ((*), TMult))
+  , ('/', ((/), TDiv))
+  , ('-', (undefined, TNeg))
+  ]
+
 eval :: ArithExp -> Rational
 eval (Number n ) = n
-eval (Op op l r) = fromJust (lookup op funcLookup) (eval l) (eval r)
-  where funcLookup = [('+', (+)), ('*', (*)), ('/', (/))]
+eval (Op op l r) = (fst . fromJust) (lookup op charLookup) (eval l) (eval r)
 
 data Token = TInt Integer | TNeg | TPlus | TMult | TDiv | TParen [Token] deriving (Show, Eq)
 
@@ -27,8 +34,7 @@ tokenizeTillClose (char : rest) = prependTok (tokLookup char)
   $ tokenizeTillClose rest
  where
   tokLookup c | isDigit c = TInt (fromIntegral $ digitToInt c)
-              | otherwise = fromJust $ lookup c table
-  table = [('-', TNeg), ('+', TPlus), ('*', TMult), ('/', TDiv)]
+              | otherwise = snd . fromJust $ lookup c charLookup
 
 prependTok :: a -> ([a], b) -> ([a], b)
 prependTok tok (toks, rest) = (tok : toks, rest)
