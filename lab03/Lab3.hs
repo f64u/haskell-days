@@ -1,7 +1,5 @@
 module Lab3 where
 import           Data.Char
-
-import           Data.List
 import           Data.Maybe
 import           Data.Ratio
 
@@ -32,8 +30,8 @@ tokenizeTillClose ('(' : rest) =
 tokenizeTillClose (char : rest) = prependTok (tokLookup char)
   $ tokenizeTillClose rest
  where
-  tokLookup c | isDigit c = TInt (fromIntegral $ digitToInt c)
-              | otherwise = snd . fromJust $ lookup c charTable
+  tokLookup char | isDigit char = TInt (fromIntegral $ digitToInt char)
+                 | otherwise    = snd . fromJust $ lookup char charTable
 
 prependTok :: a -> ([a], b) -> ([a], b)
 prependTok tok (toks, rest) = (tok : toks, rest)
@@ -45,7 +43,7 @@ parse tokens =
         then
           let (r_multdiv', l_multdiv') =
                 break (\x -> x == TMult || x == TDiv) (reverse tokens)
-              (r_multdiv, l_multdiv) = (reverse r_multdiv', reverse l_multdiv')
+              (r_multdiv, l_multdiv) = (reverse r_multdiv', reverse l_multdiv') -- double reverses I know; performance isn't a concern I presume?
           in  if null l_multdiv
                 then parseOpless tokens
                 else Op (fromJust $ lookup (last l_multdiv) revCharTable)
