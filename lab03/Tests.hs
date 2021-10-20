@@ -48,40 +48,41 @@ tests =
     eval
     (Op '+' (Op '*' (Number 2) (Number 3)) (Op '/' (Number 13) (Number (-6))))
     (23 % 6)
-  , expect1 "tokenize" tokenize "1+2"    [TInt 1, TPlus, TInt 2]
-  , expect1 "tokenize" tokenize "1 + 20" [TInt 1, TPlus, TInt 2, TInt 0]
-  , expect1 "tokenize" tokenize "1 * -2" [TInt 1, TMult, TNeg, TInt 2]
+  , expect1 "tokenize" tokenize "1+2"    [TInt 1, TOp '+', TInt 2]
+  , expect1 "tokenize" tokenize "1 + 20" [TInt 1, TOp '+', TInt 2, TInt 0]
+  , expect1 "tokenize" tokenize "1 * -2" [TInt 1, TOp '*', TOp '-', TInt 2]
   , expect1 "tokenize"
             tokenize
             "1 + 2 * 3 + 4"
-            [TInt 1, TPlus, TInt 2, TMult, TInt 3, TPlus, TInt 4]
+            [TInt 1, TOp '+', TInt 2, TOp '*', TInt 3, TOp '+', TInt 4]
   , expect1 "tokenize"
             tokenize
             "1 * 2 + 3 + 4"
-            [TInt 1, TMult, TInt 2, TPlus, TInt 3, TPlus, TInt 4]
-  , expect1 "tokenize" tokenize "(1+2)"     [TParen [TInt 1, TPlus, TInt 2]]
-  , expect1 "tokenize" tokenize " (1 + 2 )" [TParen [TInt 1, TPlus, TInt 2]]
+            [TInt 1, TOp '*', TInt 2, TOp '+', TInt 3, TOp '+', TInt 4]
+  , expect1 "tokenize" tokenize "(1+2)"     [TParen [TInt 1, TOp '+', TInt 2]]
+  , expect1 "tokenize" tokenize " (1 + 2 )" [TParen [TInt 1, TOp '+', TInt 2]]
   , expect1 "tokenize"
             tokenize
             "(1 * 2 + 3)"
-            [TParen [TInt 1, TMult, TInt 2, TPlus, TInt 3]]
-  , expect1 "tokenize"
-            tokenize
-            "(-10 + 2) * 5"
-            [TParen [TNeg, TInt 1, TInt 0, TPlus, TInt 2], TMult, TInt 5]
+            [TParen [TInt 1, TOp '*', TInt 2, TOp '+', TInt 3]]
+  , expect1
+    "tokenize"
+    tokenize
+    "(-10 + 2) * 5"
+    [TParen [TOp '-', TInt 1, TInt 0, TOp '+', TInt 2], TOp '*', TInt 5]
   , expect1
     "tokenize"
     tokenize
     "5 * (-10 + (2 + 4) * 3)"
     [ TInt 5
-    , TMult
+    , TOp '*'
     , TParen
-      [ TNeg
+      [ TOp '-'
       , TInt 1
       , TInt 0
-      , TPlus
-      , TParen [TInt 2, TPlus, TInt 4]
-      , TMult
+      , TOp '+'
+      , TParen [TInt 2, TOp '+', TInt 4]
+      , TOp '*'
       , TInt 3
       ]
     ]
@@ -90,58 +91,67 @@ tests =
     tokenize
     "5 * (-10 + (2 + 4) * 3) * (3 + 2)"
     [ TInt 5
-    , TMult
+    , TOp '*'
     , TParen
-      [ TNeg
+      [ TOp '-'
       , TInt 1
       , TInt 0
-      , TPlus
-      , TParen [TInt 2, TPlus, TInt 4]
-      , TMult
+      , TOp '+'
+      , TParen [TInt 2, TOp '+', TInt 4]
+      , TOp '*'
       , TInt 3
       ]
-    , TMult
-    , TParen [TInt 3, TPlus, TInt 2]
+    , TOp '*'
+    , TParen [TInt 3, TOp '+', TInt 2]
     ]
-  , expect1 "parse" parse [TInt 2, TPlus, TInt 3] (Op '+' (Number 2) (Number 3))
-  , expect1 "parse" parse [TInt 2, TMult, TInt 3] (Op '*' (Number 2) (Number 3))
-  , expect1 "parse" parse [TInt 2, TDiv, TInt 3]  (Op '/' (Number 2) (Number 3))
   , expect1 "parse"
             parse
-            [TInt 2, TPlus, TInt 3, TMult, TInt 5]
+            [TInt 2, TOp '+', TInt 3]
+            (Op '+' (Number 2) (Number 3))
+  , expect1 "parse"
+            parse
+            [TInt 2, TOp '*', TInt 3]
+            (Op '*' (Number 2) (Number 3))
+  , expect1 "parse"
+            parse
+            [TInt 2, TOp '/', TInt 3]
+            (Op '/' (Number 2) (Number 3))
+  , expect1 "parse"
+            parse
+            [TInt 2, TOp '+', TInt 3, TOp '*', TInt 5]
             (Op '+' (Number 2) (Op '*' (Number 3) (Number 5)))
   , expect1 "parse"
             parse
-            [TParen [TInt 2, TPlus, TInt 3], TMult, TInt 5]
+            [TParen [TInt 2, TOp '+', TInt 3], TOp '*', TInt 5]
             (Op '*' (Op '+' (Number 2) (Number 3)) (Number 5))
   , expect1 "parse"
             parse
-            [TInt 2, TPlus, TNeg, TInt 3]
+            [TInt 2, TOp '+', TOp '-', TInt 3]
             (Op '+' (Number 2) (Number (-3)))
   , expect1 "parse"
             parse
-            [TInt 2, TDiv, TInt 3, TMult, TNeg, TInt 5, TInt 7]
+            [TInt 2, TOp '/', TInt 3, TOp '*', TOp '-', TInt 5, TInt 7]
             (Op '*' (Op '/' (Number 2) (Number 3)) (Number (-57)))
   , expect1
     "parse"
     parse
     [ TInt 1
     , TInt 0
-    , TMult
+    , TOp '*'
     , TParen
-      [ TNeg
+      [ TOp '-'
       , TInt 5
-      , TPlus
-      , TParen [TInt 5, TMult, TNeg, TInt 1, TInt 0]
-      , TDiv
-      , TParen [TNeg, TInt 5, TMult, TInt 1, TInt 0]
-      , TMult
+      , TOp '+'
+      , TParen [TInt 5, TOp '*', TOp '-', TInt 1, TInt 0]
+      , TOp '/'
+      , TParen [TOp '-', TInt 5, TOp '*', TInt 1, TInt 0]
+      , TOp '*'
       , TInt 8
-      , TPlus
-      , TParen [TInt 1, TInt 1, TPlus, TNeg, TInt 5]
-      , TPlus
-      , TParen [TInt 8, TInt 0, TDiv, TInt 2, TMult, TInt 2]
-      , TPlus
+      , TOp '+'
+      , TParen [TInt 1, TInt 1, TOp '+', TOp '-', TInt 5]
+      , TOp '+'
+      , TParen [TInt 8, TInt 0, TOp '/', TInt 2, TOp '*', TInt 2]
+      , TOp '+'
       , TInt 5
       ]
     ]
@@ -176,31 +186,31 @@ tests =
     "parse"
     parse
     [ TInt 1
-    , TPlus
+    , TOp '+'
     , TParen
       [ TInt 2
-      , TPlus
+      , TOp '+'
       , TParen
         [ TInt 3
-        , TPlus
+        , TOp '+'
         , TParen
           [ TInt 4
-          , TPlus
-          , TParen [TInt 5, TPlus, TParen [TInt 6], TPlus, TNeg, TInt 5]
-          , TPlus
-          , TNeg
+          , TOp '+'
+          , TParen [TInt 5, TOp '+', TParen [TInt 6], TOp '+', TOp '-', TInt 5]
+          , TOp '+'
+          , TOp '-'
           , TInt 4
           ]
-        , TPlus
-        , TNeg
+        , TOp '+'
+        , TOp '-'
         , TInt 3
         ]
-      , TPlus
-      , TNeg
+      , TOp '+'
+      , TOp '-'
       , TInt 2
       ]
-    , TPlus
-    , TNeg
+    , TOp '+'
+    , TOp '-'
     , TInt 1
     ]
     (Op
