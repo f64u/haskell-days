@@ -16,6 +16,8 @@ charLookup =
   , ('/', ((/), TDiv))
   , ('-', (undefined, TNeg))
   ]
+reverseCharLookup :: [(Token, Char)]
+reverseCharLookup = [ (tok, char) | (char, (_, tok)) <- charLookup ]
 
 eval :: ArithExp -> Rational
 eval (Number n ) = n
@@ -49,9 +51,9 @@ parse tokens =
               (r_multdiv, l_multdiv) = (reverse r_multdiv', reverse l_multdiv')
           in  if null l_multdiv
                 then parseOpless tokens
-                else if last l_multdiv == TMult
-                  then Op '*' (parse $ init l_multdiv) (parse r_multdiv)
-                  else Op '/' (parse $ init l_multdiv) (parse r_multdiv)
+                else Op (fromJust $ lookup (last l_multdiv) reverseCharLookup)
+                        (parse $ init l_multdiv)
+                        (parse r_multdiv)
         else Op '+' (parse l_plus) (parse $ tail r_plus)
  where
   parseOpless (TParen tokens : _) = parse tokens -- TParen can only be surrounded with ops, so if we got here, nothing is beside it
