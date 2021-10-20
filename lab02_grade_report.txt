@@ -1,0 +1,355 @@
+*** CS 161 Lab 2 Grade Report, Brief Comments, and Test Results ***************
+
+
+Graded by caldwellb@uchicago.edu
+
+This commit was graded (git tag: faea8cc54ddbb67ac0f556d055d491fa4426fbab):
+
+commit faea8cc54ddbb67ac0f556d055d491fa4426fbab
+Author: Brian Hempel <bnhempel@mtu.edu>
+Date:   Thu Oct 14 11:43:04 2021 -0500
+
+    Starter code for Lab 3
+
+View this code at: https://mit.cs.uchicago.edu/cmsc16100-aut-21/fady/tree/faea8cc54ddbb67ac0f556d055d491fa4426fbab/lab02
+
+
+
+
+`ghc Main.hs` succeeds:            10 / 10%
+Tests Grade, scaled to 90%:        90.0000 / 90%
+
+Total:                             100.00%
+*** Your Grade: ***            *** 25/25 ***
+
+
+Any failed test cases were attempted in GHCi for possible 75% credit.
+
+Your unscaled tests grade is 100.0%.
+
+
+### Instructor Comments ###############
+
+Great Job!
+
+
+
+--- Style tips ---
+
+Use more descriptive variable names. Short names like s, is, a1, b1, a2, b2, xs,
+x, a, b, r1, and r2 do not convey enough information.
+
+
+Congratulations on a perfect lab!
+
+====== Trying instructor's tests... ======
+
+
+
+-- Compiling Main.hs...
+[1 of 3] Compiling Interval         ( Interval.hs, Interval.o )
+[2 of 3] Compiling SimpleTime       ( SimpleTime.hs, SimpleTime.o )
+[3 of 3] Compiling Main             ( Main.hs, Main.o )
+Linking Main ...
+
+-- Compiling Main.hs...success!
+
+
+
+Trying:   intersection All All
+Got:      All	Correct!
+
+Trying:   intersection Empty >=2014-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   intersection Empty 2012-01-01T00:00:00<=_<2013-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   intersection All >=2014-01-01T00:00:00
+Got:      >=2014-01-01T00:00:00	Correct!
+
+Trying:   intersection >=2015-01-01T00:00:00 All
+Got:      >=2015-01-01T00:00:00	Correct!
+
+Trying:   intersection <2013-01-01T00:00:00 All
+Got:      <2013-01-01T00:00:00	Correct!
+
+Trying:   intersection <2015-01-01T00:00:00 All
+Got:      <2015-01-01T00:00:00	Correct!
+
+Trying:   intersection All 2012-01-01T00:00:00<=_<2013-01-01T00:00:00
+Got:      2012-01-01T00:00:00<=_<2013-01-01T00:00:00	Correct!
+
+Trying:   intersection 2011-01-01T00:00:00<=_<2013-01-01T00:00:00 All
+Got:      2011-01-01T00:00:00<=_<2013-01-01T00:00:00	Correct!
+
+Trying:   intersection >=2015-01-01T00:00:00 <2013-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   intersection <2011-01-01T00:00:00 >=2012-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   intersection >=2014-01-01T00:00:00 >=2013-01-01T00:00:00
+Got:      >=2014-01-01T00:00:00	Correct!
+
+Trying:   intersection >=2011-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      >=2011-01-01T00:00:00	Correct!
+
+Trying:   intersection <2013-01-01T00:00:00 <2014-01-01T00:00:00
+Got:      <2013-01-01T00:00:00	Correct!
+
+Trying:   intersection <2015-01-01T00:00:00 <2014-01-01T00:00:00
+Got:      <2014-01-01T00:00:00	Correct!
+
+Trying:   intersection <2013-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      2011-01-01T00:00:00<=_<2013-01-01T00:00:00	Correct!
+
+Trying:   intersection >=2012-01-01T00:00:00 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2014-01-01T00:00:00<=_<2015-01-01T00:00:00	Correct!
+
+Trying:   union All <2015-01-01T00:00:00
+Got:      All	Correct!
+
+Trying:   union <2014-01-01T00:00:00 All
+Got:      All	Correct!
+
+Trying:   union Empty Empty
+Got:      Empty	Correct!
+
+Trying:   union Empty >=2014-01-01T00:00:00
+Got:      >=2014-01-01T00:00:00	Correct!
+
+Trying:   union >=2014-01-01T00:00:00 Empty
+Got:      >=2014-01-01T00:00:00	Correct!
+
+Trying:   union Empty <2011-01-01T00:00:00
+Got:      <2011-01-01T00:00:00	Correct!
+
+Trying:   union Empty <2014-01-01T00:00:00
+Got:      <2014-01-01T00:00:00	Correct!
+
+Trying:   union Empty 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2014-01-01T00:00:00<=_<2015-01-01T00:00:00	Correct!
+
+Trying:   union 2011-01-01T00:00:00<=_<2012-01-01T00:00:00 Empty
+Got:      2011-01-01T00:00:00<=_<2012-01-01T00:00:00	Correct!
+
+Trying:   union <2013-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      All	Correct!
+
+Trying:   union >=2014-01-01T00:00:00 >=2013-01-01T00:00:00
+Got:      >=2013-01-01T00:00:00	Correct!
+
+Trying:   union >=2011-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      >=2011-01-01T00:00:00	Correct!
+
+Trying:   union <2013-01-01T00:00:00 <2014-01-01T00:00:00
+Got:      <2014-01-01T00:00:00	Correct!
+
+Trying:   union <2015-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      <2015-01-01T00:00:00	Correct!
+
+Trying:   union 2011-01-01T00:00:00<=_<2012-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2011-01-01T00:00:00<=_<2015-01-01T00:00:00	Correct!
+
+Trying:   union 2012-01-01T00:00:00<=_<2015-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2012-01-01T00:00:00<=_<2015-01-01T00:00:00	Correct!
+
+Trying:   union <2011-01-01T00:00:00 >=2012-01-01T00:00:00
+Got:      <2011-01-01T00:00:00,>=2012-01-01T00:00:00	Correct!
+
+Trying:   union >=2013-01-01T00:00:00 <2011-01-01T00:00:00
+Got:      <2011-01-01T00:00:00,>=2013-01-01T00:00:00	Correct!
+
+Trying:   difference All Empty
+Got:      All	Correct!
+
+Trying:   difference Empty >=2014-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   difference Empty 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   difference >=2012-01-01T00:00:00 Empty
+Got:      >=2012-01-01T00:00:00	Correct!
+
+Trying:   difference >=2014-01-01T00:00:00 Empty
+Got:      >=2014-01-01T00:00:00	Correct!
+
+Trying:   difference <2012-01-01T00:00:00 Empty
+Got:      <2012-01-01T00:00:00	Correct!
+
+Trying:   difference All >=2014-01-01T00:00:00
+Got:      <2014-01-01T00:00:00	Correct!
+
+Trying:   difference 2011-01-01T00:00:00<=_<2012-01-01T00:00:00 Empty
+Got:      2011-01-01T00:00:00<=_<2012-01-01T00:00:00	Correct!
+
+Trying:   difference All 2012-01-01T00:00:00<=_<2013-01-01T00:00:00
+Got:      <2012-01-01T00:00:00,>=2013-01-01T00:00:00	Correct!
+
+Trying:   difference >=2014-01-01T00:00:00 >=2013-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   difference 2011-01-01T00:00:00<=_<2012-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      Empty	Correct!
+
+Trying:   difference >=2013-01-01T00:00:00 <2011-01-01T00:00:00
+Got:      >=2013-01-01T00:00:00	Correct!
+
+Trying:   difference >=2015-01-01T00:00:00 <2013-01-01T00:00:00
+Got:      >=2015-01-01T00:00:00	Correct!
+
+Trying:   difference <2013-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      <2011-01-01T00:00:00	Correct!
+
+Trying:   difference <2011-01-01T00:00:00 2013-01-01T00:00:00<=_<2014-01-01T00:00:00
+Got:      <2011-01-01T00:00:00	Correct!
+
+Trying:   difference 2012-01-01T00:00:00<=_<2015-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2012-01-01T00:00:00<=_<2013-01-01T00:00:00	Correct!
+
+Trying:   difference <2015-01-01T00:00:00 <2014-01-01T00:00:00
+Got:      2014-01-01T00:00:00<=_<2015-01-01T00:00:00	Correct!
+
+Trying:   difference >=2011-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2011-01-01T00:00:00<=_<2013-01-01T00:00:00,>=2015-01-01T00:00:00	Correct!
+
+Trying:   difference >=2012-01-01T00:00:00 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      2012-01-01T00:00:00<=_<2014-01-01T00:00:00,>=2015-01-01T00:00:00	Correct!
+
+Trying:   disjoint Empty 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint <2012-01-01T00:00:00 Empty
+Got:      True	Correct!
+
+Trying:   disjoint >=2012-01-01T00:00:00 Empty
+Got:      True	Correct!
+
+Trying:   disjoint Empty >=2014-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint >=2014-01-01T00:00:00 Empty
+Got:      True	Correct!
+
+Trying:   disjoint Empty All
+Got:      True	Correct!
+
+Trying:   disjoint All Empty
+Got:      True	Correct!
+
+Trying:   disjoint All >=2014-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint All <2013-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint All <2014-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint All <2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint <2014-01-01T00:00:00 All
+Got:      False	Correct!
+
+Trying:   disjoint >=2015-01-01T00:00:00 All
+Got:      False	Correct!
+
+Trying:   disjoint <2013-01-01T00:00:00 All
+Got:      False	Correct!
+
+Trying:   disjoint <2011-01-01T00:00:00 2013-01-01T00:00:00<=_<2014-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint <2011-01-01T00:00:00 >=2012-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint >=2013-01-01T00:00:00 <2011-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint >=2015-01-01T00:00:00 <2013-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   disjoint <2013-01-01T00:00:00 <2014-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint 2011-01-01T00:00:00<=_<2012-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint <2013-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint >=2014-01-01T00:00:00 >=2013-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint <2015-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint >=2011-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   disjoint 2012-01-01T00:00:00<=_<2015-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal Empty Empty
+Got:      True	Correct!
+
+Trying:   equal All All
+Got:      True	Correct!
+
+Trying:   equal All <2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal Empty 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal >=2012-01-01T00:00:00 Empty
+Got:      False	Correct!
+
+Trying:   equal Empty 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal Empty 2011-01-01T00:00:00<=_<2012-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal All <2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal <2015-01-01T00:00:00 All
+Got:      False	Correct!
+
+Trying:   equal >=2011-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      True	Correct!
+
+Trying:   equal >=2015-01-01T00:00:00 <2013-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal >=2012-01-01T00:00:00 2014-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal <2011-01-01T00:00:00 2013-01-01T00:00:00<=_<2014-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal <2013-01-01T00:00:00 >=2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal 2012-01-01T00:00:00<=_<2015-01-01T00:00:00 2013-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal >=2013-01-01T00:00:00 <2011-01-01T00:00:00
+Got:      False	Correct!
+
+Trying:   equal <2015-01-01T00:00:00 2011-01-01T00:00:00<=_<2015-01-01T00:00:00
+Got:      False	Correct!
+
+
+
+
+
+
+
+
+
+
