@@ -21,7 +21,7 @@ tokenize = fst . tokenizeTillClose . filter (not . isSpace)
       let (toks, rest') = tokenizeTillClose rest
        in prependTok (TParen toks) (tokenizeTillClose rest')
     tokenizeTillClose (char : rest) =
-      prependTok (if isDigit char then TInt (fromIntegral $ digitToInt char) else TOp char) $
+      prependTok (if isDigit char then TInt . fromIntegral $ digitToInt char else TOp char) $
         tokenizeTillClose rest
     prependTok tok (toks, rest) = (tok : toks, rest)
 
@@ -32,7 +32,7 @@ parse toks = case (null rplus, null lmultdiv) of
   _ -> Op '+' (parse lplus) (parse $ tail rplus)
   where
     ((lplus, rplus), (rmultdiv, lmultdiv)) = (break (== TOp '+') toks, (\f (a, b) -> (f a, f b)) reverse $ break (`elem` [TOp '*', TOp '/']) (reverse toks))
-    parseOpless (TParen toks:_) = parse toks
-    parseOpless (TOp '-':toks) = let (Number n) = parseOpless toks in Number (- n)
+    parseOpless (TParen toks : _) = parse toks
+    parseOpless (TOp '-' : toks) = let (Number n) = parseOpless toks in Number (- n)
     parseOpless toks =
       Number . sum $ zipWith (\i (TInt n) -> 10 ^ i * (n % 1)) (reverse [0 .. length toks - 1]) toks
