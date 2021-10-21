@@ -31,7 +31,8 @@ parse toks = case (null rplus, null lmultdiv) of
   (True, _) -> Op (let (TOp char) = last lmultdiv in char) (parse $ init lmultdiv) (parse rmultdiv)
   _ -> Op '+' (parse lplus) (parse $ tail rplus)
   where
-    ((lplus, rplus), (rmultdiv, lmultdiv)) = (break (== TOp '+') toks, (\f (a, b) -> (f a, f b)) reverse $ break (`elem` [TOp '*', TOp '/']) (reverse toks))
+    (lplus, rplus) =  break (== TOp '+') toks
+    (rmultdiv, lmultdiv) = (\f (a, b) -> (f a, f b)) reverse $ break (`elem` [TOp '*', TOp '/']) (reverse toks)
     parseOpless (TParen toks : _) = parse toks
     parseOpless (TOp '-' : toks) = let (Number n) = parseOpless toks in Number (- n)
     parseOpless toks =
