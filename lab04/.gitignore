@@ -1,0 +1,6 @@
+CollectPermutations
+WordCount
+*.o
+*.hi
+*.exe
+.DS_Store
