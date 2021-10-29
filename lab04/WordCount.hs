@@ -1,3 +1,5 @@
+module Main where
+
 import           Counter                        ( counterize )
 import           Data.Char                      ( toLower )
 import           Data.List

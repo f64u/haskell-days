@@ -1,3 +1,5 @@
+module Main where
+
 import           Counter                        ( counterize )
 import           Data.ByteString.Lazy           ( intercalate )
 import           Data.Char                      ( toLower )
@@ -8,6 +10,8 @@ import           WordUtil                       ( splitIntoWords )
 
 import           Debug.Trace
 
+-- | A list that doesn't care about the order of its elements in comparison.
+--   Aka a MultiSet (without the bells and whistles).
 newtype OrderlessList a = OrderlessList { getOList :: [a] }
 
 instance Foldable OrderlessList where
@@ -24,6 +28,8 @@ instance Ord a => Ord (OrderlessList a) where
 
 type Table = Map.Map (OrderlessList Char) (Set.Set String)
 
+-- | Turns a list of words into a map with the keys being the/a word and the values being
+--   the words that are comprised of the same characters that comprised the key, aka a permutation of it.
 collectPermutations :: [String] -> Table
 collectPermutations = foldr
   (\x -> Map.unionWith Set.union
