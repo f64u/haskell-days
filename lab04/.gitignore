@@ -1,5 +1,6 @@
 CollectPermutations
 WordCount
+WordSegmenter
 *.o
 *.dyn*
 *.hi
