@@ -1,6 +1,7 @@
 CollectPermutations
 WordCount
 *.o
+*.dyn*
 *.hi
 *.exe
 .DS_Store
