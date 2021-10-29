@@ -9,7 +9,6 @@ main = do
   getContents
     >>= putStrLn
     .   unwords
-    .   fst
     .   segmentWords (map (map toLower) (words contents))
     .   init -- ooh \n is there didn't know
 

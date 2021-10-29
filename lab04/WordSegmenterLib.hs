@@ -2,9 +2,9 @@ module WordSegmenterLib where
 
 -- | Segments words based on their occurance in dict. 
 --   Returns prematurely if it compeletely consumed the string.
-segmentWords :: [String] -> String -> ([String], String)
+segmentWords :: [String] -> String -> [String]
 segmentWords dict str =
-  let (lst, word, _) = segmentNextCharInWord ([], "", str) in (lst, word)
+  let (lst, word, _) = segmentNextCharInWord ([], "", str) in lst
  where
   segmentNextCharInWord
     :: ([String], String, String) -> ([String], String, String)
