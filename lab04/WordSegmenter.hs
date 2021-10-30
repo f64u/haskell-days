@@ -17,11 +17,6 @@ main = do
     .   segmentWords (Set.fromList (map (map toLower) (words contents)))
     .   filter (not . isSpace) -- there shouldn't be any but just in case (and for example there can be a newline at the end)
 
-  -- print
-  --   . segmentWords (map (map toLower) (words contents))
-  --   . filter (not . isSpace)
-  --   $ "itisappropriatetostartthestudyofmathematicallogicbyinquiringwhatmathematicallogicis"
-
 
 
 

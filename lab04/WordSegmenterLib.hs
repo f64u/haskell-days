@@ -1,8 +1,6 @@
 module WordSegmenterLib where
 import qualified Data.Set                      as Set
 
-import           Debug.Trace
-
 -- | Segments words based on their occurance in dict. 
 --   Returns prematurely if it compeletely consumed the string.
 segmentWords :: Set.Set String -> String -> ([String], String)
