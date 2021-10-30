@@ -7,8 +7,6 @@ segmentWords :: Set.Set String -> String -> ([String], String)
 segmentWords dict str =
   let (lst, word, _) = segmentNextCharInWord ([], "", str) in (lst, word)
  where
-  segmentNextCharInWord
-    :: ([String], String, String) -> ([String], String, String)
   segmentNextCharInWord (lst, word, "") = (lst, word, "") -- word was not found and string exhausted, we did what we could :(
   segmentNextCharInWord (lst, word, c : rest)
     | length newWord >= 24  -- largest word in dict
