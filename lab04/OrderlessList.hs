@@ -7,7 +7,10 @@ import           Counter                        ( counterize )
 newtype OrderlessList a = OrderlessList { getOList :: [a] }
 
 instance Foldable OrderlessList where
-  foldr f a lst = foldr f a (getOList lst)
+  foldr f a = foldr f a . getOList
+
+instance Functor OrderlessList where
+  fmap f = OrderlessList . map f . getOList
 
 instance (Show a) => Show (OrderlessList a) where
   show = ("OrderlessList " ++) . show . getOList
