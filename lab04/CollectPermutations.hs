@@ -8,7 +8,6 @@ import qualified Data.Set                      as Set
 import           OrderlessList                  ( OrderlessList(OrderlessList) )
 import           WordUtil                       ( splitIntoWords )
 
-
 type Table = Map.Map (OrderlessList Char) (Set.Set String)
 
 -- | Turns a list of words into a map with the keys being the/a word and the values being
@@ -16,7 +15,6 @@ type Table = Map.Map (OrderlessList Char) (Set.Set String)
 collectPermutations :: [String] -> Table
 collectPermutations = Map.unionsWith Set.union
   . map (\x -> Map.singleton (OrderlessList x) (Set.singleton x))
-
 
 main :: IO ()
 main =

@@ -4,7 +4,6 @@ import           Data.Char                      ( isSpace
                                                 , toLower
                                                 )
 import qualified Data.Set                      as Set
-import           System.IO
 import           WordSegmenterLib
 
 main = do
