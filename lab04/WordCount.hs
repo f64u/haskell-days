@@ -2,7 +2,6 @@ module Main where
 
 import           Counter                        ( counterize )
 import           Data.Char                      ( toLower )
-import           Data.List
 import qualified Data.Map.Strict               as Map
 import           WordUtil                       ( splitIntoWords )
 
