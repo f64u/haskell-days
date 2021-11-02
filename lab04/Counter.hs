@@ -8,3 +8,4 @@ type Counter c = Map.Map c Integer
 -- | Counts how many times a value occured in a Functor foldable structure.
 counterize :: (Ord a, Functor f, Foldable f) => f a -> Counter a
 counterize = Map.unionsWith (+) . fmap (flip Map.singleton 1)
+
