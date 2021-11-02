@@ -1,0 +1,134 @@
+*** CS 161 Lab 3 Grade Report, Brief Comments, and Test Results ***************
+
+
+Graded by caldwellb@uchicago.edu
+
+This commit was graded (git tag: c54cd4c03b0fd987acc6a04d8928e6d5c07a1790):
+
+commit c54cd4c03b0fd987acc6a04d8928e6d5c07a1790
+Author: Fady Adal <2masadel@gmail.com>
+Date:   Thu Oct 21 17:23:17 2021 -0500
+
+    readability increasing-aimed refactors
+
+View this code at: https://mit.cs.uchicago.edu/cmsc16100-aut-21/fady/tree/c54cd4c03b0fd987acc6a04d8928e6d5c07a1790/lab03
+
+
+
+
+`ghc Calc.hs` succeeds:            10 / 10%
+`ghci Tests.hs` succeeds:          10 / 10%
+Clean code:                        9 / 10%
+Tests in Tests.hs:                 20 / 20%
+Tests Grade, scaled to 50%:        50.0000 / 50%
+EC rational tests:                 10 / 10%
+
+Total:                             109.00%
+*** Your Grade: ***            *** 27/25 ***
+
+
+Your unscaled instructor tests grade is 100.0%.
+
+
+### Instructor Comments ###############
+
+
+Great Job!
+
+
+--- Style tips ---
+
+You are missing a type declaration on charDict.
+
+
+Again, congratulations on a perfect lab!
+
+
+
+
+====== Trying instructor's tests... ======
+
+
+
+-- Compiling Main.hs...
+Loaded package environment from /home/caldwellb/.ghc/x86_64-linux-8.10.7/environments/default
+[1 of 2] Compiling Lab3             ( Lab3.hs, Lab3.o )
+[2 of 2] Compiling Main             ( Main.hs, Main.o )
+Linking Main ...
+
+-- Compiling Main.hs...success!
+
+
+
+CORRECT:   Expected 0	 got 0 / 1 for "0"
+CORRECT:   Expected 1	 got 1 / 1 for "1"
+CORRECT:   Expected -2	 got -2 / 1 for "-2"
+CORRECT:   Expected 3	 got 3 / 1 for "(3)"
+CORRECT:   Expected -4	 got -4 / 1 for "(-4)"
+CORRECT:   Expected 5	 got 5 / 1 for "( 5 )"
+CORRECT:   Expected 6	 got 6 / 1
+> Main: <stdin>: hGetLine: end of file for " ( 6)"
+CORRECT:   Expected -7	 got -7 / 1 for " (-7 )"
+CORRECT:   Expected 17	 got 17 / 1 for "8+9"
+CORRECT:   Expected 19	 got 19 / 1 for "  9 + 10"
+CORRECT:   Expected 10	 got 10 / 1
+> Main: for "(10)"
+CORRECT:   Expected 11	 got 11 / 1
+> Main: for "  11"
+CORRECT:   Expected 25	 got 25 / 1 for "12+13"
+CORRECT:   Expected -1	 got -1 / 1 for "  13 +  -14"
+CORRECT:   Expected 210	 got 210 / 1 for "  14* 15"
+CORRECT:   Expected 5	 got 5 / 1 for "15 / 3"
+CORRECT:   Expected -4	 got -4 / 1 for "  16/-4"
+CORRECT:   Expected 23	 got 23 / 1 for "17 + 2 * 3"
+CORRECT:   Expected 39	 got 39 / 1 for "18 * 2 + 3"
+CORRECT:   Expected 21	 got 21 / 1 for "19 + 6 / 3"
+CORRECT:   Expected 40	 got 40 / 1 for "20 * 4 / 2"
+CORRECT:   Expected 1	 got 1 / 1
+> Main: for "21 / 7 / 3"
+CORRECT:   Expected 24	 got 24 / 1 for " ( 22 + 2 )"
+CORRECT:   Expected 49	 got 49 / 1 for "(23 * 2 + 3)"
+CORRECT:   Expected 38	 got 38 / 1 for "(24 + 2 + 3 * 2 + 6)"
+CORRECT:   Expected -115	 got -115 / 1 for "(-25 + 2) * 5"
+CORRECT:   Expected 174	 got 174 / 1 for "(26 + 3) * (5 + 1)"
+CORRECT:   Expected 216	 got 216 / 1 for "27 * (-10 + (2 + 4) * 3)"
+CORRECT:   Expected 66	 got 66 / 1 for "(28 + (2 + ((4 + 2) * 6)))"
+CORRECT:   Expected 520	 got 520 / 1 for "(-29 + ((2) + (4)) * (10 + 30 / 5 * 3 + -6)) * (3 + 2) + 5"
+
+Extra credit rational tests:
+CORRECT:   Expected 1/2	 got 1 / 2 for "1 / 2"
+CORRECT:   Expected -1/2	 got -1 / 2 for "1 / -2"
+CORRECT:   Expected 1/2	 got 1 / 2 for "-1 / -2"
+CORRECT:   Expected -8/3	 got -8 / 3 for "16 / -6"
+CORRECT:   Expected 11/2	 got 11 / 2 for "1 / 2 + 5"
+CORRECT:   Expected 5/2	 got 5 / 2 for "1 / 2 * 5"
+CORRECT:   Expected 20/3	 got 20 / 3 for "20 / 6 * 2"
+CORRECT:   Expected 1/6	 got 1 / 6 for "-1/2 + 2/3"
+CORRECT:   Expected -1/3	 got -1 / 3 for "(-1/2) * (2/3)"
+CORRECT:   Expected -3/4	 got -3 / 4 for "(-1/2) / (2/3)"
+
+Total correct: 30/30
+
+
+
+
+Trying Tests.hs in GHCi...
+
+
+Trying `ghci Tests.hs -e ''`, got:
+
+Trying `ghci Tests.hs -e 'length $ filter isSuccess tests'`, got:
+24
+Trying `ghci Tests.hs -e 'length $ filter (not . isSuccess) tests'`, got:
+0
+Trying `ghci Tests.hs -e 'showFailures'`, got:
+
+
+
+
+
+
+
+
+
+
