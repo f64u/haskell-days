@@ -1,0 +1,5 @@
+Lab5
+*.o
+*.hi
+*.exe
+.DS_Store
