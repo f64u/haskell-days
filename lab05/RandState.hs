@@ -9,14 +9,12 @@ newtype RandState a = RandState {
 }
 
 instance Functor RandState where
-  fmap f rs =
-    RandState $ \gen -> let (a, gen') = runRandState rs gen in (f a, gen')
+  fmap f rs = rs >>= return . f
 instance Applicative RandState where
   pure a = RandState $ (,) a
-  mf <*> ma = RandState $ \gen ->
-    let (f, gen' ) = runRandState mf gen
-        (a, gen'') = runRandState ma gen'
-    in  (f a, gen'')
+  mf <*> ma = do
+    f <- mf
+    f <$> ma
 
 instance Monad RandState where
   mra >>= f = RandState $ \gen ->
