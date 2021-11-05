@@ -58,8 +58,9 @@ fullCardDeck = [ PlayingCard v s | v <- allVals, s <- allSuits ]
 
 -- | Removes a random card from a deck and returns the pair of the card removed and the deck without the card
 removeCard :: Deck -> RandState (PlayingCard, Deck)
-removeCard lst =
-  (\i -> (lst !! i, filter (/= lst !! i) lst)) <$> randR (0, length lst - 1)
+removeCard lst = do
+  rIndex <- randR (0, length lst - 1)
+  pure (lst !! rIndex, filter (/= lst !! rIndex) lst)
 
 -- | Given a deck, the function returns a randomly shuffled deck
 shuffleDeck :: Deck -> RandState Deck
