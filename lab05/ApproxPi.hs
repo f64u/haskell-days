@@ -3,7 +3,7 @@ import           RandState
 import           System.Environment             ( getArgs )
 import           System.Random.Stateful         ( newStdGen )
 
--- | Returns a random pair of number within a specified range
+-- | Returns a random pair of numbers within a specified range
 randPair :: (Double, Double) -> RandState (Double, Double)
 randPair (low, high) = do
   r1 <- randR (low, high)
