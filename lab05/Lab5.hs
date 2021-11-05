@@ -65,7 +65,8 @@ removeCard deck = do
   randomIndex <- randR (0, length deck - 1)
   let card = deck !! randomIndex
   pure (card, deleteAt randomIndex deck)
-  where deleteAt index = uncurry (flip (++) . tail) . swap . List.splitAt index
+ where
+  deleteAt index lst = let (lft, _ : rgt) = splitAt index lst in lft ++ rgt
 
 -- | Given a deck, the function returns a randomly shuffled deck
 shuffleDeck :: Deck -> RandState Deck
