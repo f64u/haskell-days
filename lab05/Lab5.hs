@@ -6,6 +6,8 @@ import           System.Random                  ( Random(randomR)
                                                 , newStdGen
                                                 )
 
+import qualified Data.List                     as List
+
 -- Rolling two dices 
 
 -- | Returns the sum of rolling two dices as a monadic RandState Instance
@@ -59,8 +61,9 @@ fullCardDeck = [ PlayingCard v s | v <- allVals, s <- allSuits ]
 -- | Removes a random card from a deck and returns the pair of the card removed and the deck without the card
 removeCard :: Deck -> RandState (PlayingCard, Deck)
 removeCard lst = do
-  rIndex <- randR (0, length lst - 1)
-  pure (lst !! rIndex, filter (/= lst !! rIndex) lst)
+  randomIndex <- randR (0, length lst - 1)
+  let card = lst !! randomIndex
+  pure (card, List.delete card lst)
 
 -- | Given a deck, the function returns a randomly shuffled deck
 shuffleDeck :: Deck -> RandState Deck
