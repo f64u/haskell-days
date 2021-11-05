@@ -3,6 +3,7 @@ import           RandState                      ( RandState
                                                   ( RandState
                                                   , runRandState
                                                   )
+                                                , randR
                                                 , runRandom
                                                 )
 import           System.Environment             ( getArgs )
@@ -76,11 +77,6 @@ shuffleDeck lst = do
 
 shuffleADeck :: RandState Deck
 shuffleADeck = shuffleDeck fullCardDeck
-
--- basic random functions
-
-randR :: Random a => (a, a) -> RandState a
-randR = RandState . randomR
 
 -- UNCOMMENT THE FOLLOWING BEFORE SUBMISSION --
 

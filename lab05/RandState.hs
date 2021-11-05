@@ -41,3 +41,8 @@ runRandom (RandState f) s = fst $ f s
 --  type in the Random class, using the RandState monad.
 rand :: Random a => RandState a
 rand = RandState random
+
+-- | Generates a random number within a range
+randR :: Random a => (a, a) -> RandState a
+randR = RandState . randomR
+
