@@ -7,6 +7,7 @@ import           System.Random                  ( Random(randomR)
                                                 )
 
 import qualified Data.List                     as List
+import           Data.Tuple
 
 -- Rolling two dices 
 
@@ -63,7 +64,8 @@ removeCard :: Deck -> RandState (PlayingCard, Deck)
 removeCard lst = do
   randomIndex <- randR (0, length lst - 1)
   let card = lst !! randomIndex
-  pure (card, List.delete card lst)
+  pure (card, deleteAt randomIndex lst)
+  where deleteAt index = uncurry (flip (++) . tail) . swap . List.splitAt index
 
 -- | Given a deck, the function returns a randomly shuffled deck
 shuffleDeck :: Deck -> RandState Deck
