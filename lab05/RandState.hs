@@ -1,6 +1,8 @@
 module RandState where
 
-import           System.Random
+import           System.Random                  ( Random(random, randomR)
+                                                , StdGen
+                                                )
 
 newtype RandState a = RandState {
   runRandState :: StdGen -> (a, StdGen)

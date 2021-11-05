@@ -1,19 +1,12 @@
 import           Control.Applicative            ( Applicative(liftA2) )
-import           RandState                      ( RandState
-                                                  ( RandState
-                                                  , runRandState
-                                                  )
-                                                , randR
-                                                , runRandom
-                                                )
+import           RandState
 import           System.Environment             ( getArgs )
 import           System.Random                  ( Random(randomR)
                                                 , StdGen
                                                 , newStdGen
                                                 )
-import           Test.QuickCheck                ( shuffle )
 
--- Rolling to dices 
+-- Rolling two dices 
 
 -- | Returns the sum of rolling two dices as a monadic RandState Instance
 rollTwoDice :: RandState Int
@@ -55,8 +48,8 @@ instance Show PlayingCard where
     valueStr (NumberCard n) = show n
 
 
--- fullCardDeck is a deck of cards, 52 in total, with a King, a Queen,
--- a Jack and NumberCards from 1 to 10 for each suit.
+-- | fullCardDeck is a deck of cards, 52 in total, with a King, a Queen,
+--   a Jack and NumberCards from 1 to 10 for each suit.
 fullCardDeck :: Deck
 fullCardDeck = [ PlayingCard v s | v <- allVals, s <- allSuits ]
  where
@@ -68,6 +61,7 @@ removeCard :: Deck -> RandState (PlayingCard, Deck)
 removeCard lst =
   (\i -> (lst !! i, filter (/= lst !! i) lst)) <$> randR (0, length lst - 1)
 
+-- | Given a deck, the function returns a randomly shuffled deck
 shuffleDeck :: Deck -> RandState Deck
 shuffleDeck []  = pure []
 shuffleDeck lst = do
