@@ -6,6 +6,8 @@ import           System.Random                  ( Random(randomR)
                                                 , newStdGen
                                                 )
 
+import           Control.Monad                  ( replicateM )
+import           Data.Function                  ( on )
 import qualified Data.List                     as List
 import           Data.Tuple
 
@@ -115,3 +117,20 @@ main = do
     ["shuffle"    , nTimes] -> shuffleNTimes (read nTimes) gen
     ["rollTwoDice", nTimes] -> rollTwoDiceNTimes (read nTimes) gen
     _                       -> putStrLn usage
+
+-- | Randomness test for shuffle, to be executed using ghci
+testRandomness :: IO ()
+testRandomness = do
+  gen <- newStdGen
+  let
+    nCards  = 10
+    trials  = 10000
+    cards   = take nCards fullCardDeck
+    results = fst $ runRandState (replicateM trials (shuffleDeck cards)) gen
+    stats   = map
+      (\x -> [ fromEnum (cards !! i == x !! i) | i <- [0 .. nCards] ])
+      results
+    propOccurence =
+      map (\x -> fromIntegral x / (fromIntegral trials / fromIntegral nCards))
+        $ foldr (zipWith (+)) (replicate nCards 0) stats
+  print propOccurence -- <-- a list whose values are close to 1 and whose sum is nCards
