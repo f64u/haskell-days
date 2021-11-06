@@ -131,6 +131,6 @@ testRandomness = do
       (\x -> [ fromEnum (cards !! i == x !! i) | i <- [0 .. nCards] ])
       results
     propOccurence =
-      map (\x -> fromIntegral x / (fromIntegral trials / fromIntegral nCards))
+      map (\x -> fromIntegral (x * nCards) / fromIntegral trials)
         $ foldr (zipWith (+)) (replicate nCards 0) stats
   print propOccurence -- <-- a list whose values are close to 1 and whose sum is nCards
