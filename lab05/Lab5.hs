@@ -1,15 +1,11 @@
 import           Control.Applicative            ( Applicative(liftA2) )
 import           RandState
 import           System.Environment             ( getArgs )
-import           System.Random                  ( Random(randomR)
-                                                , StdGen
+import           System.Random                  ( StdGen
                                                 , newStdGen
                                                 )
 
 import           Control.Monad                  ( replicateM )
-import           Data.Function                  ( on )
-import qualified Data.List                     as List
-import           Data.Tuple
 
 -- Rolling two dices 
 
