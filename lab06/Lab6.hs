@@ -1,21 +1,42 @@
 -- Write your parser in this file.
 
-module Lab6 (
-  Name,
-  Number,
-  TopLevelExp(..),
-  MathExp(..),
-  parse
-) where
+module Lab6
+  ( Name
+  , Number
+  , TopLevelExp(..)
+  , MathExp(..)
+  , parse
+  ) where
 
-import           Control.Applicative          hiding (many)
-import           Control.Monad
-import           Data.Char
-import           Data.List
-import           Data.Ord
-import           Text.ParserCombinators.ReadP
+import           Data.Char                      ( isAlphaNum
+                                                , isDigit
+                                                , isLower
+                                                )
+import           Data.List                      ( minimumBy
+                                                , partition
+                                                )
+import qualified Data.Map.Strict               as M
+import           Data.Ord                       ( comparing )
+import           Text.ParserCombinators.ReadP   ( (+++)
+                                                , (<++)
+                                                , ReadP
+                                                , between
+                                                , chainl1
+                                                , chainr1
+                                                , char
+                                                , many
+                                                , many1
+                                                , option
+                                                , optional
+                                                , pfail
+                                                , readP_to_S
+                                                , satisfy
+                                                , sepBy
+                                                , skipSpaces
+                                                , string
+                                                )
 
-type Name   = String  -- Variable names are strings.
+type Name = String  -- Variable names are strings.
 type Number = Int     -- The kind of number in our language.
 
 
@@ -67,37 +88,118 @@ data MathExp
     | Pow    MathExp MathExp
     deriving (Eq, Show)
 
+spaceableParser :: ReadP a -> ReadP a
+spaceableParser = between skipSpaces skipSpaces
+
+spaceableChar :: Char -> ReadP Char
+spaceableChar = spaceableParser . char
+
+parseNegExp :: ReadP MathExp -> ReadP MathExp
+parseNegExp p = Neg <$> (spaceableChar '-' *> p)
+
+parseNumber :: ReadP MathExp
+parseNumber = Number . read <$> (skipSpaces *> many1 (satisfy isDigit))
+
+parseNegNumber :: ReadP MathExp
+parseNegNumber = parseNegExp parseNumber
+
+parsePossiblyNegNumber :: ReadP MathExp
+parsePossiblyNegNumber = parseNegNumber +++ parseNumber
+
+parseName :: ReadP [Char]
+parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
+
+parseVarName :: ReadP MathExp
+parseVarName = Var <$> parseName
+
+parseNegVarName :: ReadP MathExp
+parseNegVarName = parseNegExp parseVarName
+
+parsePossiblyNegVarName :: ReadP MathExp
+parsePossiblyNegVarName = parseNegVarName +++ parseVarName
+
+parseOps :: [Char] -> ReadP (MathExp -> MathExp -> MathExp)
+parseOps op = do
+  c <- foldr1 (+++) $ map spaceableChar op
+  return $ opTable M.! c
+ where
+  opTable =
+    M.fromList [('+', Plus), ('-', Minus), ('*', Mult), ('/', Div), ('^', Pow)]
+
+parsePlusAndMinus, parseMultAndDiv, parsePow
+  :: ReadP (MathExp -> MathExp -> MathExp)
+parsePlusAndMinus = parseOps ['+', '-']
+parseMultAndDiv = parseOps ['*', '/']
+parsePow = parseOps ['^']
+
+parseFlat :: ReadP MathExp
+parseFlat = parsePossiblyNegNumber +++ parsePossiblyNegVarName
+
+parseFlatPow :: ReadP MathExp
+parseFlatPow = parseNumber +++ (Var <$> parseName)
+
+parseInParens :: ReadP a -> ReadP a
+parseInParens = between (spaceableChar '(') (spaceableChar ')')
+
+parseParenExp :: ReadP MathExp
+parseParenExp = parseInParens parseMathExp
+
+parseNegParenExp :: ReadP MathExp
+parseNegParenExp = parseNegExp parseParenExp
+
+parsePossiblyNegParen :: ReadP MathExp
+parsePossiblyNegParen = parseNegParenExp +++ parseParenExp
+
+parseMathExp :: ReadP MathExp
+parseMathExp = chainl1 (parseHigher <++ parseFlat) parsePlusAndMinus
+ where
+  parseHigher     = chainl1 (parseEvenHigher <++ parseFlat) parseMultAndDiv
+  x               = chainr1 (parsePossiblyNegParen <++ parseFlatPow) parsePow
+  parseEvenHigher = parseNegExp x <++ x
+
+
+parseTuple :: ReadP a -> ReadP [a]
+parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
+
+parseNameTuple :: ReadP [Name]
+parseNameTuple = parseTuple parseName
+
+parseMathExpTuple :: ReadP [MathExp]
+parseMathExpTuple = parseTuple parseMathExp
 
 parseMathTLE :: ReadP TopLevelExp
-parseMathTLE =
-    pfail
+parseMathTLE = MathTLE <$> parseMathExp
 
 
 parseLetTLE :: ReadP TopLevelExp
-parseLetTLE =
-    pfail
+parseLetTLE = do
+  spaceableParser $ string "let"
+  names <- parseNameTuple <++ fmap (: []) parseName
+  spaceableChar '='
+  values <- parseMathExpTuple <++ fmap (: []) parseMathExp
+  spaceableParser $ string "in"
+  LetTLE names values <$> parseMathExp
 
 
 parseTLE :: ReadP TopLevelExp
 parseTLE = do
-    tle <- parseLetTLE +++ parseMathTLE
-    skipSpaces
-    return tle
+  tle <- parseLetTLE +++ parseMathTLE
+  skipSpaces
+  return tle
 
 
 -- Run the parser on a given string.
 --
--- You should not modify this function. Grading may
+-- You should not modif y this function. Grading may
 -- look for the specific messages below.
 parse :: String -> Either String TopLevelExp
-parse str =
-    case (completeParses, incompleteParses) of
-        ([(result, "")], _  ) -> Right result  -- Only complete result.
-        ([]            , [] ) -> Left $ "No parse."
-        ([]            , _:_) -> Left $ "Incomplete parse. Unparsed: " ++ show leastRemaining
-        (_:_           , _  ) -> Left $ "Ambiguous parse: " ++ show completeParses
-    where
-        parses = readP_to_S parseTLE str
-        (completeParses, incompleteParses) =
-            partition (\(_, remaining) -> remaining == "") parses
-        leastRemaining = minimumBy (comparing length) . map snd $ incompleteParses
+parse str = case (completeParses, incompleteParses) of
+  ([(result, "")], _    ) -> Right result  -- Only complete result.
+  ([]            , []   ) -> Left $ "No parse."
+  ([], _ : _) -> Left $ "Incomplete parse. Unparsed: " ++ show leastRemaining
+  (_ : _         , _    ) -> Left $ "Ambiguous parse: " ++ show completeParses
+ where
+  parses = readP_to_S parseTLE str
+  (completeParses, incompleteParses) =
+    partition (\(_, remaining) -> remaining == "") parses
+  leastRemaining = minimumBy (comparing length) . map snd $ incompleteParses
