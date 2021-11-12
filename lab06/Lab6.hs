@@ -94,17 +94,14 @@ spaceableParser = between skipSpaces skipSpaces
 spaceableChar :: Char -> ReadP Char
 spaceableChar = spaceableParser . char
 
-parseNegExp :: ReadP MathExp -> ReadP MathExp
-parseNegExp p = Neg <$> (spaceableChar '-' *> p)
+parsePossiblyNegExp :: ReadP MathExp -> ReadP MathExp
+parsePossiblyNegExp p = (Neg <$> (spaceableChar '-' *> p)) +++ p
 
 parseNumber :: ReadP MathExp
 parseNumber = Number . read <$> (skipSpaces *> many1 (satisfy isDigit))
 
-parseNegNumber :: ReadP MathExp
-parseNegNumber = parseNegExp parseNumber
-
 parsePossiblyNegNumber :: ReadP MathExp
-parsePossiblyNegNumber = parseNegNumber +++ parseNumber
+parsePossiblyNegNumber = parsePossiblyNegExp parseNumber
 
 parseName :: ReadP [Char]
 parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
@@ -112,11 +109,8 @@ parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
 parseVarName :: ReadP MathExp
 parseVarName = Var <$> parseName
 
-parseNegVarName :: ReadP MathExp
-parseNegVarName = parseNegExp parseVarName
-
 parsePossiblyNegVarName :: ReadP MathExp
-parsePossiblyNegVarName = parseNegVarName +++ parseVarName
+parsePossiblyNegVarName = parsePossiblyNegExp parseVarName
 
 parseOps :: [Char] -> ReadP (MathExp -> MathExp -> MathExp)
 parseOps op = do
@@ -136,7 +130,7 @@ parseFlat :: ReadP MathExp
 parseFlat = parsePossiblyNegNumber +++ parsePossiblyNegVarName
 
 parseFlatPow :: ReadP MathExp
-parseFlatPow = parseNumber +++ (Var <$> parseName)
+parseFlatPow = parseNumber +++ parseVarName
 
 parseInParens :: ReadP a -> ReadP a
 parseInParens = between (spaceableChar '(') (spaceableChar ')')
@@ -144,18 +138,15 @@ parseInParens = between (spaceableChar '(') (spaceableChar ')')
 parseParenExp :: ReadP MathExp
 parseParenExp = parseInParens parseMathExp
 
-parseNegParenExp :: ReadP MathExp
-parseNegParenExp = parseNegExp parseParenExp
-
 parsePossiblyNegParen :: ReadP MathExp
-parsePossiblyNegParen = parseNegParenExp +++ parseParenExp
+parsePossiblyNegParen = parsePossiblyNegExp parseParenExp
 
 parseMathExp :: ReadP MathExp
 parseMathExp = chainl1 (parseHigher <++ parseFlat) parsePlusAndMinus
  where
   parseHigher     = chainl1 (parseEvenHigher <++ parseFlat) parseMultAndDiv
-  x               = chainr1 (parsePossiblyNegParen <++ parseFlatPow) parsePow
-  parseEvenHigher = parseNegExp x <++ x
+  parseEvenHigher = parsePossiblyNegExp
+    $ chainr1 (parsePossiblyNegParen <++ parseFlatPow) parsePow
 
 
 parseTuple :: ReadP a -> ReadP [a]
