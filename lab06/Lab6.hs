@@ -8,33 +8,11 @@ module Lab6
   , parse
   ) where
 
-import           Data.Char                      ( isAlphaNum
-                                                , isDigit
-                                                , isLower
-                                                )
-import           Data.List                      ( minimumBy
-                                                , partition
-                                                )
+import           Data.Char
+import           Data.List
 import qualified Data.Map.Strict               as M
-import           Data.Ord                       ( comparing )
-import           Text.ParserCombinators.ReadP   ( (+++)
-                                                , (<++)
-                                                , ReadP
-                                                , between
-                                                , chainl1
-                                                , chainr1
-                                                , char
-                                                , many
-                                                , many1
-                                                , option
-                                                , optional
-                                                , pfail
-                                                , readP_to_S
-                                                , satisfy
-                                                , sepBy
-                                                , skipSpaces
-                                                , string
-                                                )
+import           Data.Ord
+import           Text.ParserCombinators.ReadP
 
 type Name = String  -- Variable names are strings.
 type Number = Int     -- The kind of number in our language.
@@ -145,7 +123,7 @@ parseMathExp :: ReadP MathExp
 parseMathExp = chainl1 (parseHigher <++ parseFlat) parsePlusAndMinus
  where
   parseHigher     = chainl1 (parseEvenHigher <++ parseFlat) parseMultAndDiv
-  parseEvenHigher = parsePossiblyNegExp
+  parseEvenHigher = parsePossiblyNegExp -- I know I took the joke literally but they really are good names
     $ chainr1 (parsePossiblyNegParen <++ parseFlatPow) parsePow
 
 
