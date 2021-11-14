@@ -30,5 +30,12 @@ unparse (Let names assigns main) =
  where
   commaList [str] = str
   commaList strs  = "(" ++ intercalate ", " strs ++ ")"
+unparse (If boolExp ifTrue ifFalse) =
+  "if "
+    ++ show boolExp
+    ++ " then "
+    ++ unparse ifTrue
+    ++ " else "
+    ++ unparse ifFalse
 
 
