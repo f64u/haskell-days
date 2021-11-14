@@ -53,11 +53,11 @@ data Expr
 parsePossiblyNegExpr :: ReadP Expr -> ReadP Expr
 parsePossiblyNegExpr p = (Neg <$> (spaceableChar '-' *> p)) +++ p
 
+parsePossiblyNotExpr :: ReadP Expr -> ReadP Expr
+parsePossiblyNotExpr p = (Not <$> (spaceableParser $ string "not" *> p)) +++ p
+
 parseNumber :: ReadP Expr
 parseNumber = Number . read <$> many1 (satisfy isDigit)
-
-parsePossiblyNegNumber :: ReadP Expr
-parsePossiblyNegNumber = parsePossiblyNegExpr parseNumber
 
 parseName :: ReadP [Char]
 parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
@@ -73,16 +73,6 @@ parseBoolValue :: ReadP Expr
 parseBoolValue =
   (Boolean True <$ string "True") +++ (Boolean False <$ string "False")
 
-parsePossiblyNegVarName :: ReadP Expr
-parsePossiblyNegVarName = parsePossiblyNegExpr parseVarName
-
-parseCondition :: ReadP Expr
-parseCondition = do
-  pTrue <- spaceableParser $ option "" (string "not ")
-  cmp   <- parseExpr
-  if null pTrue then return cmp else return $ Not cmp
-  where ops = M.keys (cmpTable :: M.Map String (Number -> Number -> Bool))
-
 parseOps :: [String] -> ReadP (Expr -> Expr -> Expr)
 parseOps op = do
   str <- spaceableParser . choice $ map string op
@@ -94,6 +84,8 @@ parseOps op = do
     , ("*" , Mult)
     , ("/" , Div)
     , ("^" , Pow)
+    -- I know this isn't exactly the haskell-way of interpreting comparisons, but I think it is intuitive enough and I like it
+    -- For example, this allows `3 == 4 == False` which evaluates to True
     , ("<" , Comparison "<")
     , ("<=", Comparison "<=")
     , (">" , Comparison ">")
@@ -117,9 +109,6 @@ parseInParens = between (spaceableChar '(') (spaceableChar ')')
 
 parseParenExp :: ReadP Expr
 parseParenExp = parseInParens parseExpr
-
-parsePossiblyNegParen :: ReadP Expr
-parsePossiblyNegParen = parsePossiblyNegExpr parseParenExp
 
 parseTuple :: ReadP a -> ReadP [a]
 parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
@@ -150,7 +139,7 @@ parseLet = do
 parseIf :: ReadP Expr
 parseIf = do
   string "if"
-  condition <- parseCondition
+  condition <- parseExpr
   string "then"
   ifTrue <- parseExpr
   string "else"
@@ -159,10 +148,12 @@ parseIf = do
 parseExpr :: ReadP Expr
 parseExpr = chainl1 parseBase parseCmp
  where
-  parseBase   = chainl1 parseHigher parsePlusAndMinus
-  parseHigher = chainl1 parseEvenHigher parseMultAndDiv
+  parseBase       = chainl1 parseHigher parsePlusAndMinus
+  parseHigher     = chainl1 parseEvenHigher parseMultAndDiv
   parseEvenHigher = -- I know I took the joke literally but they really are good names
-    parsePossiblyNegExpr $ chainr1 parseEvenMoreHigher parsePow
+                    parsePossiblyNotExpr . parsePossiblyNegExpr $ chainr1
+    parseEvenMoreHigher
+    parsePow
   parseEvenMoreHigher = parseIf <++ parseLet <++ parseParenExp <++ parseFlat
 
 

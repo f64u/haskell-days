@@ -6,11 +6,11 @@ module Eval
 import qualified Data.Map.Strict               as M
 
 import           Control.Applicative
-import           Data.Maybe                     ( fromJust )
 import           Lab6
 
 -- | Possible types in our evaluator, without accounting for errors
 --   (`Either` could have replaced this, but I keep forgetting order)
+--  I wish I could make this more transparent, but I guess that takes a more dynamic language (or a more experienced programmer)
 data EvalValue = NumberValue Number | BoolValue Bool deriving (Eq, Ord)
 instance Show EvalValue where
   show (NumberValue n) = show n
@@ -35,6 +35,9 @@ eval = evalExpr []
 -- Bindings are the variables in scope.
 --
 -- Returns either an error string or a resulting number.
+-- I really like how flexible this turned out. Booleans and Numbers are handeled similarly until you put them in context,
+-- which then can result in an error (for example if you put a number in the condition part of the if expression). But aside from that,
+-- Booleans can be variables, can be operated on by keywords, and have binary operations associated with them, much like numbers.
 evalExpr :: Bindings -> Expr -> EvalResult
 evalExpr bindings expr = case expr of
   Number n    -> Right (NumberValue n)
@@ -43,20 +46,12 @@ evalExpr bindings expr = case expr of
     Nothing    -> Left $ "could not find variable \"" ++ name ++ "\""
   Boolean b            -> Right (BoolValue b)
   Not     e            -> unOpB not e "cannot not a number"
-  Comparison cmp e1 e2 -> case (recurse e1, recurse e2) of
-    (Right (BoolValue b1), Right (BoolValue b2)) ->
-      let op = cmpTable M.! cmp in Right . BoolValue $ op b1 b2
-    (Right (NumberValue n1), Right (NumberValue n2)) ->
-      let op = cmpTable M.! cmp in Right . BoolValue $ op n1 n2
-    (Right _, Right _) -> Left "cannot compare booleans and numbers"
-    (Right _, err    ) -> err
-    (err    , Right _) -> err
-    (err1   , err2   ) -> err1 <> err2
-  Neg e       -> unOpN negate e "cannot negate boolean"
-  Plus  e1 e2 -> binOpN (+) e1 e2 "plus"
-  Minus e1 e2 -> binOpN subtract e2 e1 "minus"
-  Mult  e1 e2 -> binOpN (*) e1 e2 "times"
-  Div   e1 e2 -> if recurse e2 == Right (NumberValue 0)
+  Comparison cmp e1 e2 -> compareExprs cmp e1 e2
+  Neg e                -> unOpN negate e "cannot negate boolean"
+  Plus  e1 e2          -> binOpN (+) e1 e2 "plus"
+  Minus e1 e2          -> binOpN subtract e2 e1 "minus"
+  Mult  e1 e2          -> binOpN (*) e1 e2 "times"
+  Div   e1 e2          -> if recurse e2 == Right (NumberValue 0)
     then Left "division by zero"
     else binOpN quot e1 e2 "divide"
   Pow e1 e2 -> case recurse e2 of
@@ -99,3 +94,13 @@ evalExpr bindings expr = case expr of
     (left1              , left2              ) -> left1 <> left2
    where
     errMsg = "cannot perform operation `" ++ name ++ "` in a boolean context"
+
+  compareExprs cmp e1 e2 = case (recurse e1, recurse e2) of
+    (Right (BoolValue b1), Right (BoolValue b2)) ->
+      let op = cmpTable M.! cmp in Right . BoolValue $ op b1 b2
+    (Right (NumberValue n1), Right (NumberValue n2)) ->
+      let op = cmpTable M.! cmp in Right . BoolValue $ op n1 n2
+    (Right _, Right _) -> Left "cannot compare booleans and numbers"
+    (Right _, err    ) -> err
+    (err    , Right _) -> err
+    (err1   , err2   ) -> err1 <> err2
