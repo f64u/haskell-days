@@ -62,7 +62,7 @@ evalExpr bindings expr = case expr of
   Let names mathExps mainExp | length names == length mathExps -> do
     newbindings <- zip names <$> (allRight . map (evalExpr bindings) $ mathExps)
     evalExpr (bindings ++ newbindings) mainExp
-  Let names mathExps mainExp ->
+  Let names mathExps _ ->
     Left
       $  "must assign "
       ++ show (length names)
