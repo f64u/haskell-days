@@ -158,21 +158,21 @@ filterUnfinishedExpr = do
 -- | Parses a let expr
 parseLet :: ReadP Expr
 parseLet = do
-  spaceableParser $ string "let"
+  spaceableString "let"
   names <- parseNameTuple <++ fmap (: []) parseName
   spaceableChar '='
   values <- parseTupleExpr <++ fmap (: []) parseExpr
-  spaceableParser $ string "in"
+  spaceableString "in"
   Let names values <$> filterUnfinishedExpr
 
 -- | Parses an if expr
 parseIf :: ReadP Expr
 parseIf = do
-  string "if"
+  spaceableString "if"
   condition <- parseExpr
-  string "then"
+  spaceableString "then"
   ifTrue <- parseExpr
-  string "else"
+  spaceableString "else"
   If condition ifTrue <$> filterUnfinishedExpr
 
 -- | Parses an expr
