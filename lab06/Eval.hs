@@ -57,7 +57,7 @@ evalExpr bindings expr = case expr of
   Pow e1 e2 -> case recurse e2 of
     Right (NumberValue pow) ->
       if pow < 0 then Left "negative exponent" else binOpN (^) e1 e2 "power"
-    Right _   -> Left "raised to a boolean power"
+    Right _   -> Left "raised to a boolean exponent"
     Left  err -> Left err
   Let names mathExps mainExp | length names == length mathExps -> do
     newbindings <- zip names <$> (allRight . map (evalExpr bindings) $ mathExps)
@@ -89,9 +89,9 @@ evalExpr bindings expr = case expr of
       Right . NumberValue $ op n1 n2
     (Right (BoolValue _), _                  ) -> Left errMsg
     (_                  , Right (BoolValue _)) -> Left errMsg
-    (Right _            , Left err           ) -> Left err
-    (Left  err          , Right _            ) -> Left err
-    (left1              , left2              ) -> left1 <> left2
+    (Right _            , err                ) -> err
+    (err                , Right _            ) -> err
+    (err1               , err2               ) -> err1 <> err2
    where
     errMsg = "cannot perform operation `" ++ name ++ "` in a boolean context"
 
