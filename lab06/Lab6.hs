@@ -3,7 +3,8 @@
 module Lab6
   ( Name
   , Number
-  , MathExp(..)
+  , cmpTable
+  , Expr(..)
   , parse
   ) where
 
@@ -14,6 +15,16 @@ import qualified Data.Map.Strict               as M
 import           Data.Ord
 import           Text.ParserCombinators.ReadP
 
+cmpTable :: Ord a => M.Map String (a -> a -> Bool)
+cmpTable = M.fromList
+  [ ("<" , (<))
+  , ("<=", (<=))
+  , (">" , (>))
+  , (">=", (>=))
+  , ("==", (==))
+  , ("/=", (/=))
+  ]
+
 spaceableParser :: ReadP a -> ReadP a
 spaceableParser = between skipSpaces skipSpaces
 
@@ -23,78 +34,92 @@ spaceableChar = spaceableParser . char
 type Name = String  -- Variable names are strings.
 type Number = Int     -- The kind of number in our language.
 
-data BoolExp = Comparison String MathExp MathExp | Not BoolExp deriving (Show, Eq)
-
-parseBoolCmp :: ReadP BoolExp
-parseBoolCmp = do
-  pTrue  <- option "" (spaceableParser $ string "not ")
-  leftH  <- parseMathExp
-  op     <- spaceableParser $ foldr1 (+++) (map string ops)
-  rightH <- parseMathExp
-  let cmp = Comparison op leftH rightH
-  if null pTrue then return cmp else return $ Not cmp
-  where ops = ["<", "<=", ">", ">=", "==", "/="]
-
-data MathExp
-    = Number Number
-    | Var    Name
-    | Neg    MathExp
-    | Plus   MathExp MathExp
-    | Minus  MathExp MathExp
-    | Mult   MathExp MathExp
-    | Div    MathExp MathExp
-    | Pow    MathExp MathExp
-    | Let [Name] [MathExp] MathExp
-    | If BoolExp MathExp MathExp
+data Expr
+    = Number     Number
+    | Var        Name
+    | Boolean    Bool
+    | Not        Expr
+    | Comparison String Expr Expr
+    | Neg        Expr
+    | Plus       Expr Expr
+    | Minus      Expr Expr
+    | Mult       Expr Expr
+    | Div        Expr Expr
+    | Pow        Expr Expr
+    | Let        [Name] [Expr] Expr
+    | If         Expr Expr Expr
     deriving (Eq, Show)
 
-parsePossiblyNegExp :: ReadP MathExp -> ReadP MathExp
-parsePossiblyNegExp p = (Neg <$> (spaceableChar '-' *> p)) +++ p
+parsePossiblyNegExpr :: ReadP Expr -> ReadP Expr
+parsePossiblyNegExpr p = (Neg <$> (spaceableChar '-' *> p)) +++ p
 
-parseNumber :: ReadP MathExp
+parseNumber :: ReadP Expr
 parseNumber = Number . read <$> many1 (satisfy isDigit)
 
-parsePossiblyNegNumber :: ReadP MathExp
-parsePossiblyNegNumber = parsePossiblyNegExp parseNumber
+parsePossiblyNegNumber :: ReadP Expr
+parsePossiblyNegNumber = parsePossiblyNegExpr parseNumber
 
 parseName :: ReadP [Char]
 parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
 
-parseVarName :: ReadP MathExp
+parseVarName :: ReadP Expr
 parseVarName = Var <$> do
   name <- parseName
   if name `elem` ["let", "in", "if", "not", "else", "then"]
     then pfail
     else return name
 
-parsePossiblyNegVarName :: ReadP MathExp
-parsePossiblyNegVarName = parsePossiblyNegExp parseVarName
+parseBoolValue :: ReadP Expr
+parseBoolValue =
+  (Boolean True <$ string "True") +++ (Boolean False <$ string "False")
 
-parseOps :: [Char] -> ReadP (MathExp -> MathExp -> MathExp)
+parsePossiblyNegVarName :: ReadP Expr
+parsePossiblyNegVarName = parsePossiblyNegExpr parseVarName
+
+parseCondition :: ReadP Expr
+parseCondition = do
+  pTrue <- spaceableParser $ option "" (string "not ")
+  cmp   <- parseExpr
+  if null pTrue then return cmp else return $ Not cmp
+  where ops = M.keys (cmpTable :: M.Map String (Number -> Number -> Bool))
+
+parseOps :: [String] -> ReadP (Expr -> Expr -> Expr)
 parseOps op = do
-  c <- spaceableParser $ foldr1 (+++) $ map char op
-  return $ opTable M.! c
+  str <- spaceableParser . choice $ map string op
+  return $ opTable M.! str
  where
-  opTable =
-    M.fromList [('+', Plus), ('-', Minus), ('*', Mult), ('/', Div), ('^', Pow)]
+  opTable = M.fromList
+    [ ("+" , Plus)
+    , ("-" , Minus)
+    , ("*" , Mult)
+    , ("/" , Div)
+    , ("^" , Pow)
+    , ("<" , Comparison "<")
+    , ("<=", Comparison "<=")
+    , (">" , Comparison ">")
+    , (">=", Comparison ">=")
+    , ("==", Comparison "==")
+    , ("/=", Comparison "/=")
+    ]
 
-parsePlusAndMinus, parseMultAndDiv, parsePow
-  :: ReadP (MathExp -> MathExp -> MathExp)
-parsePlusAndMinus = parseOps ['+', '-']
-parseMultAndDiv = parseOps ['*', '/']
-parsePow = parseOps ['^']
+parsePlusAndMinus, parseMultAndDiv, parsePow, parseCmp
+  :: ReadP (Expr -> Expr -> Expr)
+parsePlusAndMinus = parseOps ["+", "-"]
+parseMultAndDiv = parseOps ["*", "/"]
+parsePow = parseOps ["^"]
+parseCmp = parseOps ["<", "<=", ">", ">=", "==", "/="]
 
-parseFlat :: ReadP MathExp
-parseFlat = spaceableParser $ parseNumber +++ parseVarName
+parseFlat :: ReadP Expr
+parseFlat = spaceableParser $ parseNumber +++ parseVarName +++ parseBoolValue
 
 parseInParens :: ReadP a -> ReadP a
 parseInParens = between (spaceableChar '(') (spaceableChar ')')
 
-parseParenExp :: ReadP MathExp
-parseParenExp = parseInParens parseMathExp
+parseParenExp :: ReadP Expr
+parseParenExp = parseInParens parseExpr
 
-parsePossiblyNegParen :: ReadP MathExp
-parsePossiblyNegParen = parsePossiblyNegExp parseParenExp
+parsePossiblyNegParen :: ReadP Expr
+parsePossiblyNegParen = parsePossiblyNegExpr parseParenExp
 
 parseTuple :: ReadP a -> ReadP [a]
 parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
@@ -102,42 +127,42 @@ parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
 parseNameTuple :: ReadP [Name]
 parseNameTuple = parseTuple parseName
 
-parseMathExpTuple :: ReadP [MathExp]
-parseMathExpTuple = parseTuple parseMathExp
+parseTupleExpr :: ReadP [Expr]
+parseTupleExpr = parseTuple parseExpr
 
-filterUnfinishedMathExp :: ReadP MathExp
-filterUnfinishedMathExp = do
-  exp  <- parseMathExp
+filterUnfinishedExpr :: ReadP Expr
+filterUnfinishedExpr = do
+  exp  <- parseExpr
   rest <- look
   case rest of
     (x : _) | x `elem` ['+', '-', '/', '*', '^'] -> pfail
     _ -> return exp
 
-parseLet :: ReadP MathExp
+parseLet :: ReadP Expr
 parseLet = do
   spaceableParser $ string "let"
   names <- parseNameTuple <++ fmap (: []) parseName
   spaceableChar '='
-  values <- parseMathExpTuple <++ fmap (: []) parseMathExp
+  values <- parseTupleExpr <++ fmap (: []) parseExpr
   spaceableParser $ string "in"
-  -- This is hacky, I couldn't come up with a cleaner way
-  Let names values <$> filterUnfinishedMathExp
+  Let names values <$> filterUnfinishedExpr
 
-parseIf :: ReadP MathExp
+parseIf :: ReadP Expr
 parseIf = do
   string "if"
-  boolExp <- parseBoolCmp
+  condition <- parseCondition
   string "then"
-  ifTrue <- parseMathExp
+  ifTrue <- parseExpr
   string "else"
-  If boolExp ifTrue <$> filterUnfinishedMathExp
+  If condition ifTrue <$> filterUnfinishedExpr
 
-parseMathExp :: ReadP MathExp
-parseMathExp = chainl1 parseHigher parsePlusAndMinus
+parseExpr :: ReadP Expr
+parseExpr = chainl1 parseBase parseCmp
  where
+  parseBase   = chainl1 parseHigher parsePlusAndMinus
   parseHigher = chainl1 parseEvenHigher parseMultAndDiv
   parseEvenHigher = -- I know I took the joke literally but they really are good names
-    parsePossiblyNegExp $ chainr1 parseEvenMoreHigher parsePow
+    parsePossiblyNegExpr $ chainr1 parseEvenMoreHigher parsePow
   parseEvenMoreHigher = parseIf <++ parseLet <++ parseParenExp <++ parseFlat
 
 
@@ -145,14 +170,14 @@ parseMathExp = chainl1 parseHigher parsePlusAndMinus
 --
 -- You should not modif y this function. Grading may
 -- look for the specific messages below.
-parse :: String -> Either String MathExp
+parse :: String -> Either String Expr
 parse str = case (completeParses, incompleteParses) of
   ([(result, "")], _) -> Right result  -- Only complete result.
-  ([], []) -> Left $ "No parse."
+  ([], []) -> Left "No parse."
   ([], _ : _) -> Left $ "Incomplete parse. Unparsed: " ++ show leastRemaining
   (_ : _, _) -> Left $ "Ambiguous parse: " ++ show (map fst completeParses)
  where
-  parses = readP_to_S parseMathExp str
+  parses = readP_to_S parseExpr str
   (completeParses, incompleteParses) =
     partition (\(_, remaining) -> remaining == "") parses
   leastRemaining = minimumBy (comparing length) . map snd $ incompleteParses
