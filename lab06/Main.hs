@@ -15,8 +15,23 @@ import           Data.Char
 -- If Haskeline doesn't work, use the provided simple repl.
 -- (See the comments in the main function, line 52.)
 --
+--
+-- You should not need to modify this file for the regular lab.
+--
+-- In particular, the non-REPL branch of the main function needs
+-- to remain unchanged so grading will work.
+--
+-- Haskeline lets you hit the up arrow in our program's REPL.
+--
+-- You may need to install it with:
+--
+-- cabal install haskeline
+--
+-- If Haskeline doesn't work, use the provided simple repl.
+-- (See the comments in the main function, line 52.)
+--
 import           Eval                           ( EvalResult
-                                                , eval
+                                                , evalExpr
                                                 )
 import           Lab6                           ( parse )
 import           System.Console.Haskeline       ( InputT
@@ -43,7 +58,7 @@ prefixError _      rightResult   = rightResult
 
 tryParseEval :: String -> EvalResult
 tryParseEval expStr =
-  parse expStr >>= (prefixError "Evaluation error: " . eval)
+  parse expStr >>= (prefixError "Evaluation error: " . evalExpr [])
 
 
 -- Convert result to string or return error message.

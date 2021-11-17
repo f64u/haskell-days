@@ -62,13 +62,17 @@ data Expr
     | Apply      Expr Expr
     deriving (Eq, Show)
 
+possiblyPrefixedExpr :: (Expr -> Expr) -> ReadP a -> ReadP Expr -> ReadP Expr
+possiblyPrefixedExpr typer prefix parser =
+  (typer <$> (prefix *> skipSpaces *> parser)) +++ parser
+
 -- | Allows a parser to be prefixed by a negative sign (-)
 parsePossiblyNegExpr :: ReadP Expr -> ReadP Expr
-parsePossiblyNegExpr p = (Neg <$> (char '-' *> skipSpaces *> p)) +++ p
+parsePossiblyNegExpr = possiblyPrefixedExpr Neg (char '-')
 
 -- | Allows a parser to be prefixed by the not keyword
 parsePossiblyNotExpr :: ReadP Expr -> ReadP Expr
-parsePossiblyNotExpr p = (Not <$> (string "not " *> skipSpaces *> p)) +++ p -- That space is important, otherwise variable names
+parsePossiblyNotExpr = possiblyPrefixedExpr Not (string "not ") -- That space is important, otherwise variable names
                                                                        -- such as "not4" will not be possible
 
 -- | Parses a number
@@ -123,7 +127,7 @@ parseCmp = parseOps $ map spaceableString ["<", "<=", ">", ">=", "==", "/="]
 parsePlusAndMinus = parseOps $ map spaceableString ["+", "-"]
 parseMultAndDiv = parseOps $ map spaceableString ["*", "/"]
 parsePow = parseOps $ map spaceableString ["^"]
-parseAp = parseOps [many (char ' ') *> string " " <* many (char ' ')]
+parseAp = parseOps [" " <$ many1 (char ' ')]
 
 -- | Parses a "flat" value, either a number, a variable, or a boolean
 parseFlat :: ReadP Expr
@@ -207,15 +211,14 @@ parseLambda = parseInParens $ do
 parseExpr :: ReadP Expr
 parseExpr = skipSpaces *> chainl1 parseBase parseCmp
  where
-  parseBase           = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
-  parseHigher         = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
-  parseEvenHigher     = chainr1 parseEvenMoreHigher parsePow
-  parseEvenMoreHigher = parsePossiblyNegExpr . parsePossiblyNotExpr $ chainl1
-    parseEvenMoreMoreHigher
-    parseAp
+  parseBase       = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
+  parseHigher     = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
+  parseEvenHigher = parsePossiblyNegExpr . parsePossiblyNotExpr $ chainr1
+    parseEvenMoreHigher
+    parsePow
+  parseEvenMoreHigher = chainl1 parseEvenMoreMoreHigher parseAp
   parseEvenMoreMoreHigher =
     parseIf <++ parseLet <++ parseLambda <++ parseParenExp <++ parseFlat
-      -- <++ parseApplication
 
 
 -- Run the parser on a given string.

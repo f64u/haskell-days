@@ -41,5 +41,6 @@ unparse (If condition ifTrue ifFalse) =
     ++ " else "
     ++ unparse ifFalse
     ++ ")"
-unparse (Lambda name  expr ) = "(\\" ++ show name ++ " -> " ++ show expr ++ ")"
-unparse (Apply  expr1 expr2) = "(" ++ show expr1 ++ " " ++ show expr2 ++ ")"
+unparse (Lambda name expr) = "(\\" ++ name ++ " -> " ++ unparse expr ++ ")"
+unparse (Apply expr1 expr2) =
+  "(" ++ unparse expr1 ++ " " ++ unparse expr2 ++ ")"
