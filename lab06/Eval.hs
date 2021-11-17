@@ -12,9 +12,10 @@ import           Unparse                        ( unparse )
 -- | Possible types in our evaluator
 data EvalValue = NumberValue Number | BoolValue Bool | LambdaValue Bindings Name Expr deriving (Eq)
 instance Show EvalValue where
-  show (NumberValue n          ) = show n
-  show (BoolValue   b          ) = show b
-  show (LambdaValue _ name expr) = unparse (Lambda name expr)
+  show (NumberValue n) = show n
+  show (BoolValue   b) = show b
+  show (LambdaValue bindings name expr) =
+    unparse (Lambda name expr) ++ " where " ++ show bindings
 
 -- | Error message or result number.
 type EvalResult = Either String EvalValue

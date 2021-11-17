@@ -27,13 +27,16 @@ cmpTable = M.fromList
   , ("/=", (/=))
   ]
 
+keywords :: [String]
+keywords = ["let", "in", "if", "not", "else", "then"]
+
 -- | Allows a parser to be surrounded by spaces from either sides
 spaceableParser :: ReadP a -> ReadP a
 spaceableParser = between skipSpaces skipSpaces
 
--- -- | Allows a character to be surrounded by spaces from either sides
--- spaceableChar :: Char -> ReadP Char
--- spaceableChar = spaceableParser . char
+-- | Allows a character to be surrounded by spaces from either sides
+spaceableChar :: Char -> ReadP Char
+spaceableChar = spaceableParser . char
 
 -- | Allows a string to be surrounded by spaces from either sides
 spaceableString :: String -> ReadP String
@@ -62,6 +65,8 @@ data Expr
     | Apply      Expr Expr
     deriving (Eq, Show)
 
+-- | Allows a parser to be prefixed by a prefix and transforming the resulting expr into
+--   its corresponding prefixed counterpart
 possiblyPrefixedExpr :: (Expr -> Expr) -> ReadP a -> ReadP Expr -> ReadP Expr
 possiblyPrefixedExpr typer prefix parser =
   (typer <$> (prefix *> skipSpaces *> parser)) +++ parser
@@ -87,9 +92,7 @@ parseName = (:) <$> satisfy isLower <*> many (satisfy isAlphaNum)
 parseVarName :: ReadP Expr
 parseVarName = Var <$> do
   name <- parseName
-  if name `elem` ["let", "in", "if", "not", "else", "then"]
-    then pfail
-    else return name
+  if name `elem` keywords then pfail else return name
 
 -- | Parses the bool values True and False
 parseBoolValue :: ReadP Expr
@@ -162,49 +165,39 @@ filterUnfinishedExpr = do
   rest <- look
   if any (`isPrefixOf` rest)
          ["+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "/=", " "]
+       && not
+            (any (`isPrefixOf` dropWhile isSpace rest)
+                 ["let", "in", "if", "not", "else", "then"]
+            ) -- this is specifically for application: do not apply on keywords even if there's space
     then pfail
     else return exp
 
 -- | Parses a let expr
 parseLet :: ReadP Expr
 parseLet = do
-  string "let"
-  skipSpaces
+  spaceableString "let"
   names <- parseNameTuple <++ fmap (: []) parseName
-  skipSpaces
-  char '='
-  skipSpaces
+  spaceableChar '='
   values <- parseTupleExpr <++ fmap (: []) parseExpr
-  skipSpaces
-  string "in"
-  skipSpaces
+  spaceableString "in"
   Let names values <$> filterUnfinishedExpr
 
 -- | Parses an if expr
 parseIf :: ReadP Expr
 parseIf = do
-  skipSpaces
-  string "if"
-  skipSpaces
-  condition <- parseExpr
-  skipSpaces
-  string "then"
-  skipSpaces
+  spaceableString "if"
+  condition <- filterUnfinishedExpr
+  spaceableString "then"
   ifTrue <- parseExpr
-  skipSpaces
-  string "else"
-  skipSpaces
+  spaceableString "else"
   If condition ifTrue <$> filterUnfinishedExpr
 
 -- | Parses a lambda expr
 parseLambda :: ReadP Expr
 parseLambda = parseInParens $ do
-  char '\\'
-  skipSpaces
+  spaceableChar '\\'
   name <- parseName
-  skipSpaces
-  string "->"
-  skipSpaces
+  spaceableString "->"
   Lambda name <$> parseExpr
 
 -- | Parses an expr
