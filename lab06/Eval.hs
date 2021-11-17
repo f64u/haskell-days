@@ -7,14 +7,16 @@ import qualified Data.Map.Strict               as M
 
 import           Control.Applicative
 import           Lab6
+import           Unparse                        ( unparse )
 
 -- | Possible types in our evaluator, without accounting for errors
 --   (`Either` could have replaced this, but I keep forgetting order)
 --  I wish I could make this more transparent, but I guess that takes a more dynamic language (or a more experienced programmer)
-data EvalValue = NumberValue Number | BoolValue Bool deriving (Eq, Ord)
+data EvalValue = NumberValue Number | BoolValue Bool | LambdaValue Bindings Name Expr deriving (Eq)
 instance Show EvalValue where
-  show (NumberValue n) = show n
-  show (BoolValue   b) = show b
+  show (NumberValue n          ) = show n
+  show (BoolValue   b          ) = show b
+  show (LambdaValue _ name expr) = unparse (Lambda name expr)
 
 -- Error message or result number.
 type EvalResult = Either String EvalValue
@@ -73,6 +75,14 @@ evalExpr bindings expr = case expr of
     Right (BoolValue b) -> if b then recurse ifTrue else recurse ifFalse
     Right _             -> Left "number value in a condition context"
     Left  err           -> Left err
+  Lambda name  expr  -> Right $ LambdaValue bindings name expr
+  Apply  expr1 expr2 -> case evalExpr bindings expr1 of
+    Right (LambdaValue closureBindings name expr) -> case eval expr2 of
+      Right value ->
+        evalExpr (closureBindings ++ bindings ++ [(name, value)]) expr
+      err -> err
+    Right _ -> Left "Trying to apply a non-lambda value"
+    err     -> err
  where
   recurse = evalExpr bindings
   unOpN op e errMsg = case recurse e of

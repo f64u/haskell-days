@@ -13,6 +13,7 @@ import           Data.Char
 import           Data.List
 import qualified Data.Map.Strict               as M
 import           Data.Ord
+import           Debug.Trace
 import           Text.ParserCombinators.ReadP
 
 -- | Relates a string representing a comparison to its haskell-function equivalent 
@@ -30,9 +31,9 @@ cmpTable = M.fromList
 spaceableParser :: ReadP a -> ReadP a
 spaceableParser = between skipSpaces skipSpaces
 
--- | Allows a character to be surrounded by spaces from either sides
-spaceableChar :: Char -> ReadP Char
-spaceableChar = spaceableParser . char
+-- -- | Allows a character to be surrounded by spaces from either sides
+-- spaceableChar :: Char -> ReadP Char
+-- spaceableChar = spaceableParser . char
 
 -- | Allows a string to be surrounded by spaces from either sides
 spaceableString :: String -> ReadP String
@@ -57,15 +58,18 @@ data Expr
     | Pow        Expr Expr
     | Let        [Name] [Expr] Expr
     | If         Expr Expr Expr
+    | Lambda     Name Expr
+    | Apply      Expr Expr
     deriving (Eq, Show)
 
 -- | Allows a parser to be prefixed by a negative sign (-)
 parsePossiblyNegExpr :: ReadP Expr -> ReadP Expr
-parsePossiblyNegExpr p = (Neg <$> (spaceableChar '-' *> p)) +++ p
+parsePossiblyNegExpr p = (Neg <$> (char '-' *> skipSpaces *> p)) +++ p
 
 -- | Allows a parser to be prefixed by the not keyword
 parsePossiblyNotExpr :: ReadP Expr -> ReadP Expr
-parsePossiblyNotExpr p = (Not <$> (spaceableString "not" *> p)) +++ p
+parsePossiblyNotExpr p = (Not <$> (string "not " *> skipSpaces *> p)) +++ p -- That space is important, otherwise variable names
+                                                                       -- such as "not4" will not be possible
 
 -- | Parses a number
 parseNumber :: ReadP Expr
@@ -90,9 +94,9 @@ parseBoolValue =
 
 -- | Parses a binary operator, returns a parser that knows how to combine the exprs on both sides into
 --   one expr
-parseOps :: [String] -> ReadP (Expr -> Expr -> Expr)
+parseOps :: [ReadP String] -> ReadP (Expr -> Expr -> Expr)
 parseOps op = do
-  str <- spaceableParser . choice $ map string op
+  str <- choice op
   return $ opTable M.! str
  where
   opTable = M.fromList
@@ -101,6 +105,7 @@ parseOps op = do
     , ("*" , Mult)
     , ("/" , Div)
     , ("^" , Pow)
+    , (" " , Apply)
     -- I know this isn't exactly the haskell-way of interpreting comparisons, but I think it is intuitive enough and I like it
     -- For example, this allows `3 == 4 == False` which evaluates to True
     , ("<" , Comparison "<")
@@ -112,20 +117,21 @@ parseOps op = do
     ]
 
 -- | Each group operates on a specific operator precedency, increasing 
-parseCmp, parsePlusAndMinus, parseMultAndDiv, parsePow
+parseCmp, parsePlusAndMinus, parseMultAndDiv, parsePow, parseAp
   :: ReadP (Expr -> Expr -> Expr)
-parseCmp = parseOps ["<", "<=", ">", ">=", "==", "/="]
-parsePlusAndMinus = parseOps ["+", "-"]
-parseMultAndDiv = parseOps ["*", "/"]
-parsePow = parseOps ["^"]
+parseCmp = parseOps $ map spaceableString ["<", "<=", ">", ">=", "==", "/="]
+parsePlusAndMinus = parseOps $ map spaceableString ["+", "-"]
+parseMultAndDiv = parseOps $ map spaceableString ["*", "/"]
+parsePow = parseOps $ map spaceableString ["^"]
+parseAp = parseOps [many (char ' ') *> string " " <* many (char ' ')]
 
 -- | Parses a "flat" value, either a number, a variable, or a boolean
 parseFlat :: ReadP Expr
-parseFlat = spaceableParser $ parseNumber +++ parseVarName +++ parseBoolValue
+parseFlat = parseNumber +++ parseVarName +++ parseBoolValue
 
 -- | Parses a generic parser in parentheses 
 parseInParens :: ReadP a -> ReadP a
-parseInParens = between (spaceableChar '(') (spaceableChar ')')
+parseInParens = between (char '(' <* skipSpaces) (skipSpaces *> char ')')
 
 -- | Parses an expr in parentheses 
 parseParenExp :: ReadP Expr
@@ -133,7 +139,7 @@ parseParenExp = parseInParens parseExpr
 
 -- | Parses a tuple of a generic parser
 parseTuple :: ReadP a -> ReadP [a]
-parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
+parseTuple p = parseInParens $ p `sepBy` (skipSpaces *> char ',' <* skipSpaces)
 
 -- | Parses a tuple of names 
 parseNameTuple :: ReadP [Name]
@@ -151,40 +157,65 @@ filterUnfinishedExpr = do
   exp  <- parseExpr
   rest <- look
   if any (`isPrefixOf` rest)
-         ["+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "/="]
+         ["+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "/=", " "]
     then pfail
     else return exp
 
 -- | Parses a let expr
 parseLet :: ReadP Expr
 parseLet = do
-  spaceableString "let"
+  string "let"
+  skipSpaces
   names <- parseNameTuple <++ fmap (: []) parseName
-  spaceableChar '='
+  skipSpaces
+  char '='
+  skipSpaces
   values <- parseTupleExpr <++ fmap (: []) parseExpr
-  spaceableString "in"
+  skipSpaces
+  string "in"
+  skipSpaces
   Let names values <$> filterUnfinishedExpr
 
 -- | Parses an if expr
 parseIf :: ReadP Expr
 parseIf = do
-  spaceableString "if"
+  skipSpaces
+  string "if"
+  skipSpaces
   condition <- parseExpr
-  spaceableString "then"
+  skipSpaces
+  string "then"
+  skipSpaces
   ifTrue <- parseExpr
-  spaceableString "else"
+  skipSpaces
+  string "else"
+  skipSpaces
   If condition ifTrue <$> filterUnfinishedExpr
+
+-- | Parses a lambda expr
+parseLambda :: ReadP Expr
+parseLambda = parseInParens $ do
+  char '\\'
+  skipSpaces
+  name <- parseName
+  skipSpaces
+  string "->"
+  skipSpaces
+  Lambda name <$> parseExpr
 
 -- | Parses an expr
 parseExpr :: ReadP Expr
-parseExpr = chainl1 parseBase parseCmp
+parseExpr = skipSpaces *> chainl1 parseBase parseCmp
  where
-  parseBase       = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
-  parseHigher     = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
-  parseEvenHigher = parsePossiblyNotExpr . parsePossiblyNegExpr $ chainr1
-    parseEvenMoreHigher
-    parsePow
-  parseEvenMoreHigher = parseIf <++ parseLet <++ parseParenExp <++ parseFlat
+  parseBase           = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
+  parseHigher         = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
+  parseEvenHigher     = chainr1 parseEvenMoreHigher parsePow
+  parseEvenMoreHigher = parsePossiblyNegExpr . parsePossiblyNotExpr $ chainl1
+    parseEvenMoreMoreHigher
+    parseAp
+  parseEvenMoreMoreHigher =
+    parseIf <++ parseLet <++ parseLambda <++ parseParenExp <++ parseFlat
+      -- <++ parseApplication
 
 
 -- Run the parser on a given string.
