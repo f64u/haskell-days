@@ -89,6 +89,10 @@ main = do
          getContents >>= mapM_ (putStrLn . showParseEval) . lines
   where runHaskeline = runInputT defaultSettings superRepl
 
+-- from https://stackoverflow.com/questions/6270324/in-haskell-how-do-you-trim-whitespace-from-the-beginning-and-end-of-a-string/6270382
+trim :: String -> String
+trim = f . f where f = reverse . dropWhile isSpace
+
 
 -- Parses and evaluates given line.
 --
@@ -97,17 +101,19 @@ main = do
 --
 -- If returns Nothing, it's time to quit.
 handleReplLine :: String -> Maybe String
-handleReplLine line = if line `elem` ["q", ":q", "quit", ":quit", "exit"]
-  then Nothing
-  else
-    let unparsedStr = case parse line of
-          Right parsed -> unparse parsed ++ "\n"
-          _            -> ""
-    in  Just
-        $  (show . parse $ line)
-        ++ "\n"
-        ++ unparsedStr
-        ++ showParseEval line
+handleReplLine line' =
+  let line = trim line'
+  in  if line `elem` ["q", ":q", "quit", ":quit", "exit"]
+        then Nothing
+        else
+          let unparsedStr = case parse line of
+                Right parsed -> unparse parsed ++ "\n"
+                _            -> ""
+          in  Just
+              $  (show . parse $ line)
+              ++ "\n"
+              ++ unparsedStr
+              ++ showParseEval line
 
 
 -- Use if Haskeline doesn't work.
