@@ -69,6 +69,10 @@ showParseEval expStr = case tryParseEval expStr of
   Left  errorMsg -> errorMsg
 
 
+-- from https://stackoverflow.com/questions/6270324/in-haskell-how-do-you-trim-whitespace-from-the-beginning-and-end-of-a-string/6270382
+trim :: String -> String
+trim = f . f where f = reverse . dropWhile isSpace
+
 -- If standard input is a terminal, display a REPL.
 -- Otherwise, just parse, eval, and show each line.
 main :: IO ()
@@ -86,13 +90,8 @@ main = do
       -- display the prompt and only display results.
       --
       -- This needs to be here for grading to work.
-         getContents >>= mapM_ (putStrLn . showParseEval) . lines
+         getContents >>= mapM_ (putStrLn . showParseEval . trim) . lines
   where runHaskeline = runInputT defaultSettings superRepl
-
--- from https://stackoverflow.com/questions/6270324/in-haskell-how-do-you-trim-whitespace-from-the-beginning-and-end-of-a-string/6270382
-trim :: String -> String
-trim = f . f where f = reverse . dropWhile isSpace
-
 
 -- Parses and evaluates given line.
 --
