@@ -44,6 +44,6 @@ True
 5
 True
 2
-let (x, y) = (3, 4) in (\z -> ((x + y) - z))g
+let (x, y) = (3, 4) in (\z -> ((x + y) - z))
 11
 2
