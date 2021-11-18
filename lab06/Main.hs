@@ -1,5 +1,6 @@
 -- Main.hs for Lab 6
 import           Data.Char
+import qualified Data.Map.Strict               as M
 --
 -- You should not need to modify this file for the regular lab.
 --
@@ -58,7 +59,7 @@ prefixError _      rightResult   = rightResult
 
 tryParseEval :: String -> EvalResult
 tryParseEval expStr =
-  parse expStr >>= (prefixError "Evaluation error: " . evalExpr [])
+  parse expStr >>= (prefixError "Evaluation error: " . evalExpr M.empty)
 
 
 -- Convert result to string or return error message.

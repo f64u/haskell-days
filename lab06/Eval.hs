@@ -18,16 +18,16 @@ instance Show EvalValue where
   show (BoolValue   b) = show b
   show (LambdaValue bindings name expr) =
     "let "
-      ++ commaList (map fst bindings)
+      ++ commaList (M.keys bindings)
       ++ " = "
-      ++ commaList (map (show . snd) bindings)
+      ++ commaList (map show $ M.elems bindings)
       ++ " in "
       ++ unparse (Lambda name expr)
 
 -- | Error message or result number.
 type EvalResult = Either String EvalValue
 
-type Bindings = [(Name, EvalValue)]
+type Bindings = M.Map Name EvalValue
 
 -- | Error-aware assignment context
 type Context = State Bindings (Either String Bindings)
@@ -41,7 +41,7 @@ type Context = State Bindings (Either String Bindings)
 evalExpr :: Bindings -> Expr -> EvalResult
 evalExpr bindings expr = case expr of
   Number n    -> Right (NumberValue n)
-  Var    name -> case lookup name bindings of
+  Var    name -> case M.lookup name bindings of
     Just value -> Right value
     Nothing    -> Left $ "could not find variable \"" ++ name ++ "\""
   Boolean b            -> Right (BoolValue b)
@@ -75,7 +75,7 @@ evalExpr bindings expr = case expr of
       local <- get
       case evalExpr local expr of
         Right value -> do
-          let x = (name, value) : local
+          let x = M.insert name value local
           put x
           return . Right $ x
         Left err -> return $ Left err
@@ -102,12 +102,12 @@ evalExpr bindings expr = case expr of
     Right _             -> Left "non-boolean value in a condition context"
     err                 -> err
   Lambda name  expr  -> Right $ LambdaValue bindings name expr
-  Apply  expr1 expr2 -> case evalExpr bindings expr1 of
-    Right (LambdaValue closureBindings name expr) ->
-      case evalExpr bindings expr2 of
-        Right value ->
-          evalExpr (closureBindings ++ bindings ++ [(name, value)]) expr
-        err -> err
+  Apply  expr1 expr2 -> case recurse expr1 of
+    Right (LambdaValue closureBindings name expr) -> case recurse expr2 of
+      Right value -> evalExpr
+        (M.unions [M.singleton name value, bindings, closureBindings])
+        expr
+      err -> err
     Right _ -> Left "Trying to apply a non-lambda value"
     err     -> err
  where
