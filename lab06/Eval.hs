@@ -87,10 +87,8 @@ evalExpr bindings expr = case expr of
       case result of
         Right _ -> do -- I don't really need its value
           newResult <- prependBindings bs
-          case newResult of
-            Right actualBindings -> return . Right $ actualBindings
-            Left  err            -> return $ Left err
-        Left err -> return $ Left err
+          either (return . Left) (return . Right) newResult
+        Left err -> return . Left $ err
 
   Let names mathExps _ ->
     Left
