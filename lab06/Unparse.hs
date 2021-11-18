@@ -4,10 +4,15 @@
 --
 module Unparse
   ( unparse
+  , commaList
   ) where
 
 import           Data.List
 import           Lab6
+
+commaList :: [String] -> String
+commaList [str] = str
+commaList strs  = "(" ++ intercalate ", " strs ++ ")"
 
 
 unparse :: Expr -> String
@@ -30,9 +35,6 @@ unparse (Let names assigns main) =
     ++ " in "
     ++ unparse main
     ++ ")"
- where
-  commaList [str] = str
-  commaList strs  = "(" ++ intercalate ", " strs ++ ")"
 unparse (If condition ifTrue ifFalse) =
   "(if "
     ++ unparse condition

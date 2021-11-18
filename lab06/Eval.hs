@@ -7,7 +7,9 @@ import qualified Data.Map.Strict               as M
 
 import           Control.Monad.State
 import           Lab6
-import           Unparse                        ( unparse )
+import           Unparse                        ( commaList
+                                                , unparse
+                                                )
 
 -- | Possible types in our evaluator
 data EvalValue = NumberValue Number | BoolValue Bool | LambdaValue Bindings Name Expr deriving (Eq)
@@ -15,7 +17,12 @@ instance Show EvalValue where
   show (NumberValue n) = show n
   show (BoolValue   b) = show b
   show (LambdaValue bindings name expr) =
-    unparse (Lambda name expr) ++ " where " ++ show bindings
+    "let "
+      ++ commaList (map fst bindings)
+      ++ " = "
+      ++ commaList (map (show . snd) bindings)
+      ++ " in "
+      ++ unparse (Lambda name expr)
 
 -- | Error message or result number.
 type EvalResult = Either String EvalValue

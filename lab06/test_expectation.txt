@@ -44,6 +44,6 @@ True
 5
 True
 2
-(\z -> ((x + y) - z)) where [("x",3),("y",4)]
+let (x, y) = (3, 4) in (\z -> ((x + y) - z))g
 11
 2
