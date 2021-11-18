@@ -114,21 +114,20 @@ evalExpr bindings expr = case expr of
   recurse = evalExpr bindings
   unOpN op e errMsg = case recurse e of
     Right (NumberValue n) -> Right . NumberValue $ op n
-    Right (BoolValue   _) -> Left errMsg
+    Right _               -> Left errMsg
     left                  -> left
   unOpB op e errMsg = case recurse e of
-    Right (BoolValue   b) -> Right . BoolValue $ op b
-    Right (NumberValue _) -> Left errMsg
-    left                  -> left
+    Right (BoolValue b) -> Right . BoolValue $ op b
+    Right _             -> Left errMsg
+    left                -> left
 
   binOpN op e1 e2 name = case (recurse e1, recurse e2) of
     (Right (NumberValue n1), Right (NumberValue n2)) ->
       Right . NumberValue $ op n1 n2
-    (Right (BoolValue _), _                  ) -> Left errMsg
-    (_                  , Right (BoolValue _)) -> Left errMsg
-    (Right _            , err                ) -> err
-    (err                , Right _            ) -> err
-    (err1               , err2               ) -> err1 <> err2
+    (Right _, Right _) -> Left errMsg
+    (Right _, err    ) -> err
+    (err    , Right _) -> err
+    (err1   , err2   ) -> err1 <> err2
    where
     errMsg =
       "cannot perform operation `" ++ name ++ "` in a non-numerical context"
