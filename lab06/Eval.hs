@@ -78,7 +78,7 @@ evalExpr bindings expr = case expr of
           let x = M.insert name value local
           put x
           return . Right $ x
-        Left err -> return $ Left err
+        Left err -> return . Left $ err
     prependBindings :: [(Name, Expr)] -> Context
     prependBindings []       = state $ \s -> (Right s, s)
     prependBindings [b     ] = addBinding b
