@@ -119,7 +119,7 @@ evalExpr bindings expr = case expr of
   Apply  expr1 expr2 -> case recurse expr1 of
     Right (LambdaValue closureBindings name expr) -> case recurse expr2 of
       Right value -> evalExpr
-        (M.unions [M.singleton name value, bindings, closureBindings])
+        (M.unions [M.singleton name value, closureBindings, bindings])
         expr
       err -> err
     Right _ -> Left "Trying to apply a non-lambda value"
