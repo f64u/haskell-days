@@ -32,6 +32,7 @@ type Bindings = M.Map Name EvalValue
 -- | Error-aware assignment context
 type Context = State Bindings (Either String Bindings)
 
+eval :: Expr -> EvalResult
 eval = evalExpr $ M.singleton
   "not"
   (LambdaValue
