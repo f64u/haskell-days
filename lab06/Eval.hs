@@ -1,6 +1,6 @@
 module Eval
   ( EvalResult
-  , evalExpr
+  , eval
   ) where
 
 import qualified Data.Map.Strict               as M
@@ -31,6 +31,19 @@ type Bindings = M.Map Name EvalValue
 
 -- | Error-aware assignment context
 type Context = State Bindings (Either String Bindings)
+
+eval = evalExpr $ M.singleton
+  "not"
+  (LambdaValue
+    M.empty
+    "x"
+    (If (Comparison "==" (Var "x") (Boolean True))
+        (Boolean False)
+        (Boolean True)
+    )
+  )
+
+
 
 -- Bindings are the variables in scope.
 --

@@ -28,7 +28,7 @@ cmpTable = M.fromList
   ]
 
 keywords :: [String]
-keywords = ["let", "in", "if", "not", "else", "then"]
+keywords = ["let", "in", "if", "else", "then"]
 
 -- | Allows a parser to be surrounded by spaces from either sides
 spaceableParser :: ReadP a -> ReadP a
@@ -74,11 +74,6 @@ possiblyPrefixedExpr typer prefix parser =
 -- | Allows a parser to be prefixed by a negative sign (-)
 parsePossiblyNegExpr :: ReadP Expr -> ReadP Expr
 parsePossiblyNegExpr = possiblyPrefixedExpr Neg (char '-')
-
--- | Allows a parser to be prefixed by the not keyword
-parsePossiblyNotExpr :: ReadP Expr -> ReadP Expr
-parsePossiblyNotExpr = possiblyPrefixedExpr Not (string "not ") -- That space is important, otherwise variable names
-                                                                       -- such as "not4" will not be possible
 
 -- | Parses a number
 parseNumber :: ReadP Expr
@@ -204,11 +199,9 @@ parseLambda = parseInParens $ do
 parseExpr :: ReadP Expr
 parseExpr = skipSpaces *> chainl1 parseBase parseCmp
  where
-  parseBase       = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
-  parseHigher     = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
-  parseEvenHigher = parsePossiblyNegExpr . parsePossiblyNotExpr $ chainr1
-    parseEvenMoreHigher
-    parsePow
+  parseBase           = chainl1 parseHigher parsePlusAndMinus  -- yes this is a later addition how did you know
+  parseHigher         = chainl1 parseEvenHigher parseMultAndDiv -- I know I took the joke literally but they really are good names
+  parseEvenHigher = parsePossiblyNegExpr $ chainr1 parseEvenMoreHigher parsePow
   parseEvenMoreHigher = chainl1 parseEvenMoreMoreHigher parseAp
   parseEvenMoreMoreHigher =
     parseIf <++ parseLet <++ parseLambda <++ parseParenExp <++ parseFlat

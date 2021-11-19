@@ -32,7 +32,7 @@ import qualified Data.Map.Strict               as M
 -- (See the comments in the main function, line 52.)
 --
 import           Eval                           ( EvalResult
-                                                , evalExpr
+                                                , eval
                                                 )
 import           Lab6                           ( parse )
 import           System.Console.Haskeline       ( InputT
@@ -59,7 +59,7 @@ prefixError _      rightResult   = rightResult
 
 tryParseEval :: String -> EvalResult
 tryParseEval expStr =
-  parse expStr >>= (prefixError "Evaluation error: " . evalExpr M.empty)
+  parse expStr >>= (prefixError "Evaluation error: " . eval)
 
 
 -- Convert result to string or return error message.
