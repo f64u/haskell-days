@@ -13,7 +13,6 @@ import           Data.Char
 import           Data.List
 import qualified Data.Map.Strict               as M
 import           Data.Ord
-import           Debug.Trace
 import           Text.ParserCombinators.ReadP
 
 -- | Relates a string representing a comparison to its haskell-function equivalent 
@@ -141,7 +140,7 @@ parseParenExp = parseInParens parseExpr
 
 -- | Parses a tuple of a generic parser
 parseTuple :: ReadP a -> ReadP [a]
-parseTuple p = parseInParens $ p `sepBy` (skipSpaces *> char ',' <* skipSpaces)
+parseTuple p = parseInParens $ p `sepBy` spaceableChar ','
 
 -- | Parses a tuple of names 
 parseNameTuple :: ReadP [Name]
@@ -160,10 +159,7 @@ filterUnfinishedExpr = do
   rest <- look
   if any (`isPrefixOf` rest)
          ["+", "-", "*", "/", "^", "<", "<=", ">", ">=", "==", "/=", " "]
-       && not
-            (any (`isPrefixOf` dropWhile isSpace rest)
-                 ["let", "in", "if", "not", "else", "then"]
-            ) -- this is specifically for application: do not apply on keywords even if there's space
+       && not (any (`isPrefixOf` dropWhile isSpace rest) keywords) -- this is specifically for application: do not apply on keywords even if there's space
     then pfail
     else return exp
 
