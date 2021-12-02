@@ -1,0 +1,6 @@
+Lab7
+*.o
+*.hi
+*.exe
+.DS_Store
+dist-newstyle
