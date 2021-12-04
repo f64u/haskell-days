@@ -1,0 +1,131 @@
+*** CS 161 Lab 6 Grade Report, Brief Comments, and Test Results ***************
+
+
+Graded by brianhempel@uchicago.edu
+
+This commit was graded (git tag: 2f59c16e527c302fef1b91b1f8cb5399d511b885):
+
+commit 2f59c16e527c302fef1b91b1f8cb5399d511b885
+Author: Fady Adal <2masadel@gmail.com>
+Date:   Fri Nov 19 23:51:25 2021 -0600
+
+    consistency stuff
+
+View this code at: https://mit.cs.uchicago.edu/cmsc16100-aut-21/fady/tree/2f59c16e527c302fef1b91b1f8cb5399d511b885/lab06
+
+
+
+
+`ghc Main.hs` succeeds:                     10 / 10%
+Code cleanliness:                           10 / 10%
+Test cases parsed:                          60 / 40%
+Test cases evaluated correctly:             60 / 40%
+
+Total:                             140.00%
+*** Your Grade: ***            *** 35/25 ***
+
+
+
+### Instructor Comments ###############
+
+
+Wow! Great job!
+
+Yes, it's perfectly reasonable to crash when e.g. a boolean is used as the conditional of an if-then-else. Because that is indeed a type error, although our language lacks a type-checker.
+
+
+--- Style tips ---
+
+Style looks good. Keep it up.
+
+
+
+
+
+
+====== Trying instructor's tests... ======
+
+
+
+-- Compiling Main.hs...
+[1 of 4] Compiling Lab6             ( Lab6.hs, Lab6.o )
+[2 of 4] Compiling Unparse          ( Unparse.hs, Unparse.o )
+[3 of 4] Compiling Eval             ( Eval.hs, Eval.o )
+[4 of 4] Compiling Main             ( Main.hs, Main.o )
+Linking Main ...
+
+-- Compiling Main.hs...success!
+
+
+
+
+CORRECT:            Expected 1      got 1      for "1"
+CORRECT:            Expected -2     got -2     for "-2"
+CORRECT:            Expected 3      got 3      for "3"
+CORRECT:            Expected 4      got 4      for " 4"
+CORRECT:            Expected 25     got 25     for " 5^2"
+CORRECT:            Expected -6     got -6     for " - 6"
+CORRECT:            Expected 7      got 7      for "(7)"
+CORRECT:            Expected 8      got 8      for " ( 8 )"
+CORRECT:            Expected 10     got 10     for "9 + 1"
+CORRECT:            Expected 9      got 9      for "10 + -1"
+CORRECT:            Expected -10    got -10    for "-11 + 1"
+CORRECT:            Expected -13    got -13    for "-12 + -1"
+CORRECT:            Expected 14     got 14     for "((13+1) )"
+CORRECT:            Expected 17     got 17     for "14 + 1 + 2"
+CORRECT:            Expected 14     got 14     for "15 + 1 - 2"
+CORRECT:            Expected 17     got 17     for "16 - 1 + 2"
+CORRECT:            Expected 14     got 14     for "(17 - 1 - 2)"
+CORRECT:            Expected 20     got 20     for "18 + 1 * 2"
+CORRECT:            Expected 45     got 45     for "  19/2*5"
+CORRECT:            Expected 2      got 2      for "20/(2*5)"
+CORRECT:            Expected -2     got -2     for "20/(-2*5)"
+CORRECT:            Expected -2     got -2     for "20/(2*-5)"
+CORRECT:            Expected 203    got 203    for "3 + 10 ^ 2 * 2"
+CORRECT:            Expected -7     got -7     for "-3^2 + 2"
+CORRECT:            Expected -8     got -8     for "(-2)^3"
+CORRECT:            Expected 512    got 512    for "2^3^2"
+CORRECT:            Expected 8      got 8      for "5--3"
+CORRECT:            Expected 25     got 25     for " 100 / 2 / 2"
+CORRECT:            Expected -38    got -38    for " 5 * - 10 + 2 - 1 + 4 * 3 / 2 * 3 - 4 - 5 + 2"
+CORRECT:            Expected 44     got 44     for "(1 + (2 + ((4 + 2) * 6))) - (-2 + -3)"
+CORRECT:            Expected 44     got 44     for "  ( ( 1  + ( 2 + ( ( 4 + 2 ) * 6 ) ) ) - ( -2 + -3 ) )"
+CORRECT:            Expected 0      got 0      for "let x = 0 in x*10"
+CORRECT:            Expected 20     got 20     for "let two = 2 in (two*10)"
+CORRECT:            Expected 33     got 33     for "  let   x   =   3   +   5   in   (x*x + 2)/2"
+CORRECT:            Expected 9      got 9      for "let var = (1+2) in var*var"
+CORRECT:            Expected 13     got 13     for "let (x1, x2) = (-4, 5) in -x1-x1+x2"
+CORRECT:            Expected 9      got 9      for "let (a,b,c) = (3,4,6-2) in a*a + b*b - c*c"
+CORRECT:            Expected 0      got 0      for "let (a,b,hypot) = (3,4,5) in a^2 + b^2 - hypot^2"
+CORRECT:            Expected 1024   got 1024   for "let validVarName = 2^5 in validVarName * (validVarName)"
+CORRECT:            Expected 7      got 7      for "let  ( r2d2 , c3po )  =  ( ( 2^2 ) , ( 3 + (0) ) )  in   r2d2  + c3po"
+CORRECT:            Expected 22     got 22     for "12 + let x = 10 in x"
+CORRECT:            Expected 10     got 10     for "let x = 3 in let y = x + x in 4 + y"
+CORRECT:            Expected 20     got 20     for "let x = (let y = 5 in y+y) in 2 * x"
+CORRECT:            Expected 84     got 84     for "let (x1, x2) = (2 + let y = 5 in y+y, let (z1, z2) = (3, 4) in z1 + z2) in x1 * x2"
+CORRECT:            Expected -3     got -3     for "1 - let x = -1 in let y = -2 in let z = -3 in x - y - z"
+CORRECT:            Expected 0      got 0      for "if 1 > 0 then 0 else 1"
+CORRECT:            Expected 1      got 1      for "if 1 == 0 then 0 else 1"
+CORRECT:            Expected 0      got 0      for "if not (1 == 0) then 0 else 1"
+CORRECT:            Expected 15     got 15     for "let (t, f) = (1>=0, 1<=0) in if t then (if f then 5 else 15) else 7"
+CORRECT:            Expected 8      got 8      for "let cond = if 5 /= 5*2 then 8 else 9 in cond"
+CORRECT:            Expected 5      got 5      for "(\\x -> x) 5"
+CORRECT:            Expected 36     got 36     for "(\\x -> x 6) (\\y -> y*y)"
+CORRECT:            Expected 49     got 49     for "let f = (\\x -> x*x) in f 7"
+CORRECT:            Expected -2     got -2     for "let diff = (\\x -> (\\y -> x-y)) in diff 8 10"
+CORRECT:            Expected 4      got 4      for "let (pred, succ) = ((\\n -> n-1), (\\n -> n+1)) in pred (pred (succ 5))"
+CORRECT:            Expected 0      got 0      for "let (sq,a,b,hypot) = ((\\num -> num*num),3,4,5) in (sq a) + (sq b) - (sq hypot)"
+CORRECT:            Expected 16     got 16     for "(\\shadow -> (\\shadow -> shadow*shadow)) 0 4"
+CORRECT:            Expected 120    got 120    for "let factorial = (\\n -> (\\fact -> if n == 0 then 1 else n * (fact (n-1) fact))) in factorial 5 factorial"
+CORRECT:            Expected 2      got 2      for "let abs = (\\n -> if n < 0 then 0-n else n) in let absDist = (\\x -> (\\y -> abs (x-y))) in absDist 8 10"
+CORRECT:            Expected 24     got 24     for "(\\f -> (\\x -> f (\\y -> x x y)) (\\x -> f (\\y -> x x y))) (\\fact -> (\\n -> if n == 0 then 1 else n * (fact (n-1)))) 4"
+
+
+
+
+-- ------------- Summary ------------------------
+--
+-- Tests parsed:               60/40
+-- Tests evaluated correctly:  60/40
+--
+
