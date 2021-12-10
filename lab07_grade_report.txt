@@ -1,0 +1,197 @@
+*** CS 161 Lab 7 Grade Report, Brief Comments, and Test Results ***************
+
+
+Graded by brianhempel@uchicago.edu
+
+This commit was graded (git tag: 68829e47a32a09d86c3bf66ffc12343eb8241006):
+
+commit 68829e47a32a09d86c3bf66ffc12343eb8241006
+Author: Fady Adal <2masadel@gmail.com>
+Date:   Thu Dec 2 16:38:11 2021 -0600
+
+    done
+
+View this code at: https://mit.cs.uchicago.edu/cmsc16100-aut-21/fady/tree/68829e47a32a09d86c3bf66ffc12343eb8241006/lab07
+
+
+
+
+`cabal build` succeeds:                     10 / 10%
+Code cleanliness:                           10 / 10%
+Implements the undefined functions:         30 / 30%
+Serves web pages:                           25 / 25%
+Correct logging output:                     25 / 25%
+
+Total:                             100.00%
+*** Your Grade: ***            *** 15/15 ***
+
+
+
+### Instructor Comments ###############
+
+
+Great job!
+
+
+--- Style tips ---
+
+Style looks good. Keep it up.
+
+
+
+
+
+
+====== Trying instructor's tests... ======
+
+
+
+-- Running `cabal build`...
+Resolving dependencies...
+Build profile: -w ghc-8.10.7 -O1
+In order, the following will be built (use -v for more details):
+ - lab07-0.1.0.0 (exe:Lab7) (first run)
+Configuring executable 'Lab7' for lab07-0.1.0.0..
+Preprocessing executable 'Lab7' for lab07-0.1.0.0..
+Building executable 'Lab7' for lab07-0.1.0.0..
+[1 of 1] Compiling Main             ( Lab7.hs, /Users/brian/Documents/phd/cmsc_16100/labs/student_git_repos/fady/lab07/dist-newstyle/build/x86_64-osx/ghc-8.10.7/lab07-0.1.0.0/x/Lab7/build/Lab7/Lab7-tmp/Main.o )
+Linking /Users/brian/Documents/phd/cmsc_16100/labs/student_git_repos/fady/lab07/dist-newstyle/build/x86_64-osx/ghc-8.10.7/lab07-0.1.0.0/x/Lab7/build/Lab7/Lab7 ...
+
+
+-- ...success!
+
+
+
+
+
+-- Starting server: $ cabal run
+-- Opening TCP connection to localhost on port 2222
+-- Sending "GET / HTTP/1.1\r\n\r\n"
+-- Response:
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Length: 1055
+Server: Lab 7 Silly Haskell Server 1.0
+Connection: close
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>You Have Arrived.</title>
+  <style>
+  footer { font-size: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Super Great Web Page Served By Your Very Own Webserver!</h1>
+  <p>
+    You might<br>
+    write an actual<br>
+    Haiku here.
+  </p>
+  <p>
+    <pre>
+      OR        /\   /^^  /^\ | |      /\   |^\  ^^|^^
+      DRAW     /__\  \-\ |    | |     /__\  |-<    |
+      SOME    /    \ __/  \_/ | |    /    \ |  \   |
+    </pre>
+  </p>
+  <h3>Things to see:</h3>
+  <ul>
+    <li><a href="">if you don't click this link you will never know where it goes!!</a> it's okay you don't have to click it</li>
+    <li><a href="ascii_art/quality_controller.html">an orphan that made his way</a></li>
+    <li><a href="ascii_art/self_portrait.html">a lab TA's self portrait</a></li>
+    <li><a href="http://poignant.guide/">wrong language, but this is the greatest programming book ever written</a>*</li>
+  </ul>
+  <footer>
+    *(don't tell the professors but almost all your grading scripts were written in Ruby)
+  </footer>
+</body>
+</html>
+
+
+-- Log lines:
+Up to date
+Waiting for connections on port 2222...
+Connection accepted from 127.0.0.1:50163
+[127.0.0.1:50163] Requested /
+[127.0.0.1:50163] 200 OK
+[127.0.0.1:50163] Connection closed.
+
+
+-- HTTP HTML Response?	Yes.
+-- Log includes "Requested /"?	Yes.
+-- Log includes "200 OK"?	Yes.
+-- Log includes "Connection closed."?	Yes.
+-- Log includes /^\[.*\]/?	Yes.
+
+
+-- Starting server: $ cabal run
+-- Opening TCP connection to localhost on port 2222
+-- Sending "GET /asdfasdf.html HTTP/1.1\r\n\r\n"
+-- Response:
+HTTP/1.1 404 Not Found
+Content-Type: text/html; charset=UTF-8
+Content-Length: 106
+Server: Lab 7 Silly Haskell Server 1.0
+Connection: close
+
+<!DOCTYPE html><html><head><title>Not Found</title></head><body><h1>404!</h1>File not found!</body></html>
+
+-- Log lines:
+Up to date
+Waiting for connections on port 2222...
+Connection accepted from 127.0.0.1:50165
+[127.0.0.1:50165] Requested /asdfasdf.html
+[127.0.0.1:50165] 404 Not Found
+[127.0.0.1:50165] Connection closed.
+
+
+-- HTTP HTML Response?	Yes.
+-- Log includes "Requested /asdfasdf.html"?	Yes.
+-- Log includes "404 Not Found"?	Yes.
+-- Log includes "Connection closed."?	Yes.
+-- Log includes /^\[.*\]/?	Yes.
+
+
+-- Starting server: $ cabal run
+-- Opening TCP connection to localhost on port 2222
+-- Sending "asdf\r\n\r\n"
+-- Response:
+HTTP/1.1 400 Bad Request
+Content-Type: text/html; charset=UTF-8
+Content-Length: 179
+Server: Lab 7 Silly Haskell Server 1.0
+Connection: close
+
+<!DOCTYPE html><html><head><title>Bad Request</title></head><body><h1>Bad request.</h1>It could be my fault. When I grow up I want to be a full-featured HTTP server.</body></html>
+
+-- Log lines:
+Up to date
+Waiting for connections on port 2222...
+Connection accepted from 127.0.0.1:50167
+[127.0.0.1:50167] 400 Bad Request
+[127.0.0.1:50167] Connection closed.
+
+
+-- HTTP HTML Response?	Yes.
+-- Log includes "400 Bad Request"?	Yes.
+-- Log includes "Connection closed."?	Yes.
+-- Log includes /^\[.*\]/?	Yes.
+
+
+-- Starting server: $ cabal run
+-- Opening TCP connection to localhost on port 2222
+-- Sending "asdf"
+
+-- Log lines:
+Up to date
+Waiting for connections on port 2222...
+Connection accepted from 127.0.0.1:50169
+[127.0.0.1:50169] Connection broken.
+
+
+-- Log includes "Connection broken."?	Yes.
+-- Log includes /^\[.*\]/?	Yes.
+
+
